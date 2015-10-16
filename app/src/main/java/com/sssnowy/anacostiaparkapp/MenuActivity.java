@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 public class MenuActivity extends AppCompatActivity {
 
@@ -48,5 +49,24 @@ public class MenuActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(hasFocus) {
+            Button b1 = (Button)findViewById(R.id.button1);
+            Button b2 = (Button)findViewById(R.id.button2);
+            Button b3 = (Button)findViewById(R.id.button3);
+            Button b4 = (Button)findViewById(R.id.button4);
+            Button b5 = (Button)findViewById(R.id.button5);
+            Button b6 = (Button)findViewById(R.id.button6);
+            b1.setHeight(b1.getWidth());
+            b2.setHeight(b2.getWidth());
+            b3.setHeight(b3.getWidth());
+            b4.setHeight(b4.getWidth());
+            b5.setHeight(b5.getWidth());
+            b6.setHeight(b6.getWidth());
+        }
     }
 }
