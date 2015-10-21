@@ -11,4 +11,5 @@
     <color name="aws_colorSecondaryDark2">#004F5B</color>
     <color name="aws_colorLight">#BCD7D0</color>
     <color name="aws_colorDark">#0A0F13</color>
+    <color name="aws_menuButton">#83afa6</color>
 </resources>
