@@ -1,5 +1,6 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -25,6 +26,15 @@ public class MenuActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+            }
+        });
+
+        Button tourButton = (Button)findViewById(R.id.button1);
+        tourButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MenuActivity.this, TourActivity.class);
+                startActivity(intent);
             }
         });
     }
