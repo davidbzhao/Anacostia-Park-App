@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
+import android.hardware.TriggerEvent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -26,6 +27,13 @@ public class TourActivity extends AppCompatActivity {
     private int currentZone = -1;
     public MediaPlayer mp;
     private int cnt = 0;
+    double[][][] polygons = {{{38.818441, -77.168650},
+           // {38.818050, -77.168066},
+            {38.818631, -77.167492},
+            {38.818500, -77.167223},
+            {38.817069, -77.167970},
+            {38.817238, -77.168886},
+            {38.817660, -77.169636}}};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,25 +51,6 @@ public class TourActivity extends AppCompatActivity {
             }
         });
         mp = MediaPlayer.create(TourActivity.this, R.raw.paradise);
-/*
-        Button trigger = (Button)findViewById(R.id.triggerButton);
-        trigger.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(cnt == 0){
-                    playAudio(R.raw.barnum);
-                    Toast.makeText(TourActivity.this, "Barnum", Toast.LENGTH_SHORT).show();
-                } else if(cnt == 1){
-                    playAudio(R.raw.empire);
-                    Toast.makeText(TourActivity.this, "Empire", Toast.LENGTH_SHORT).show();
-                } else {
-                    playAudio(R.raw.paradise);
-                    Toast.makeText(TourActivity.this, "Paradise", Toast.LENGTH_SHORT).show();
-                }
-                cnt = (cnt + 1) % 3;
-            }
-        });*/
-
 
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
@@ -77,12 +66,15 @@ public class TourActivity extends AppCompatActivity {
             */
             @Override
             public void onLocationChanged(Location location) {
+                Button triggerButton = (Button)findViewById(R.id.triggerButton);
+                triggerButton.setText(location.getLatitude() + "," + location.getLongitude());
                 Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
                 int zone = getZone(location.getLatitude(), location.getLongitude());
                 if(currentZone != zone){
                     if(!mp.isPlaying()) {
                         playAudio(getResidFromZone(zone));
                     }
+                    currentZone = zone;
                 }
             }
 
@@ -109,6 +101,28 @@ public class TourActivity extends AppCompatActivity {
 
     public int getZone(double latitude, double longitude){
         //TJ 38.8184974,-77.168681
+        //polygon
+        /*
+        p1  38.818341, -77.168650
+        p2  38.818050, -77.168066
+        p3  38.818631, -77.167492
+        p4  38.818500, -77.167223
+        p5  38.817069, -77.167970
+        p6  38.817238, -77.168886
+        p7  38.817660, -77.169636
+
+         */
+
+        for(int cnt = 0; cnt < polygons.length; cnt++) {
+            int intersections = numberOfLinesCrossed(polygons[cnt], latitude, longitude);
+            Toast.makeText(TourActivity.this, intersections + "", Toast.LENGTH_SHORT).show();
+            if(intersections % 2 == 1) {
+                return cnt;
+            }
+        }
+        return 1;
+
+/*
         if(latitude < 38.8184974 && longitude < -77.168681){
             return 0;
         } else if(latitude > 38.8184974 && longitude < -77.168681){
@@ -119,20 +133,20 @@ public class TourActivity extends AppCompatActivity {
             return 3;
         } else {
             return -1;
-        }
+        }*/
     }
 
     public int getResidFromZone(int zone){
         Button triggerButton = (Button)findViewById(R.id.triggerButton);
-        triggerButton.setText(zone + "");
+        triggerButton.setText(triggerButton.getText() + " " + zone);
         if(zone == 0){
             return R.raw.paradise;
         } else if(zone == 1){
-            return R.raw.empire;
+            return R.raw.barnum;
         } else if(zone == 2){
-            return R.raw.barnum;
+            return R.raw.empire;
         } else {
-            return R.raw.barnum;
+            return R.raw.empire;
         }
     }
 
@@ -143,29 +157,25 @@ public class TourActivity extends AppCompatActivity {
         mp.start();
     }
 
-    /*int zone = getZone(location.getLatitude(), location.getLongitude());
-                if(currentZone == zone){
-                    zone = 1;
-                }
-                Toast.makeText(TourActivity.this, zone + "", Toast.LENGTH_SHORT).show();
-                if (currentZone != zone) {
-                    currentZone = zone;
-                    mp.stop();
-                    mp.release();
-                    Toast.makeText(TourActivity.this, "playAudio", Toast.LENGTH_SHORT).show();
-                    if(zone == 0){
-                        try {
-                            mp.setDataSource(TourActivity.this, Uri.parse("android.resource//com.sssnowy.anacostiaparkapp/raw/paradise"));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        try {
-                            mp.setDataSource(TourActivity.this, Uri.parse("android.resource//com.sssnowy.anacostiaparkapp/raw/barnum"));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    mp.start();
-                }*/
+    public int numberOfLinesCrossed(double[][] polygon, double latitude, double longitude){
+        int intersections = 0;
+        for(int cnt = 0; cnt < polygon.length; cnt++){
+            double[] point1 = polygon[cnt];
+            double[] point2 = polygon[(cnt + 1) % polygon.length];
+            //if the latitudes are the same, aka the slope is horizontal
+            if(point1[0] == point2[0]){
+                continue;
+            }
+            //get slope & y-int of line between point1 and point2
+            double m = (point2[0] - point1[0])/(point2[1] - point1[1]);
+            double b = point1[0] - m * point1[1];
+            //find the x value of the intersection point between the horizontal line that runs through the user location and the point1/point2 line
+            double x = (1/m)*(latitude - b);
+            //if x is in the range both lines
+            if((point1[1] - x < 0 ^ point2[1] - x < 0) && x > longitude){
+                intersections += 1;
+            }
+        }
+        return intersections;
+    }
 }
