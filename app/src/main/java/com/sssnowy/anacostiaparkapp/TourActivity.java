@@ -19,6 +19,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -26,6 +27,7 @@ import java.io.IOException;
 public class TourActivity extends AppCompatActivity {
     private int currentZone = -1;
     public MediaPlayer mp;
+    ImageButton playButton;
     private int cnt = 0;
     double[][][] polygons = {{{38.818441, -77.168650},
            // {38.818050, -77.168066},
@@ -50,7 +52,22 @@ public class TourActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
         mp = MediaPlayer.create(TourActivity.this, R.raw.paradise);
+        playButton = (ImageButton)findViewById(R.id.playButton);
+
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mp.isPlaying()){
+                    mp.pause();
+                    playButton.setBackgroundResource(R.drawable.play);
+                } else {
+                    mp.start();
+                    playButton.setBackgroundResource(R.drawable.pause);
+                }
+            }
+        });
 
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
