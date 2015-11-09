@@ -41,8 +41,6 @@ public class MenuActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-
-
     }
 
     @Override

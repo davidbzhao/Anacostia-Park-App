@@ -1,36 +1,35 @@
 package com.sssnowy.anacostiaparkapp;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.AssetFileDescriptor;
-import android.hardware.TriggerEvent;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-import java.io.FileDescriptor;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.HashMap;
 
 public class TourActivity extends AppCompatActivity {
     private int currentZone = -1;
     public MediaPlayer mp;
-    ImageButton playButton;
+    private ImageButton playButton;
+    private LinearLayout linearLayoutTranscript;
     private int cnt = 0;
     double[][][] polygons = {{{38.818441, -77.168650},
-           // {38.818050, -77.168066},
             {38.818631, -77.167492},
             {38.818500, -77.167223},
             {38.817069, -77.167970},
@@ -53,9 +52,37 @@ public class TourActivity extends AppCompatActivity {
             }
         });
 
+        //initialize
         mp = MediaPlayer.create(TourActivity.this, R.raw.paradise);
         playButton = (ImageButton)findViewById(R.id.playButton);
+        linearLayoutTranscript = (LinearLayout)findViewById(R.id.linearLayoutTranscript);
 
+        //populate
+        BufferedReader bufferedReader = null;
+        HashMap<Integer, String> transcript = new HashMap<>();
+        try {
+            bufferedReader = new BufferedReader(new InputStreamReader(getAssets().open("transcript.txt")));
+            String line;
+            while((line = bufferedReader.readLine()) != null){
+                String[] splitLine = line.split("=");
+                transcript.put(Integer.parseInt(splitLine[0]), splitLine[1]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(bufferedReader != null){
+                try {
+                    bufferedReader.close();
+                } catch(IOException e){
+
+                }
+            }
+        }
+        populateLinearLayoutTranscript(transcript);
+
+        //linearLayoutTranscript.addView()
+
+        //listeners
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,6 +136,7 @@ public class TourActivity extends AppCompatActivity {
                 Toast.makeText(TourActivity.this, "off", Toast.LENGTH_SHORT).show();
             }
         };
+
         if(checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
         } else {
@@ -118,18 +146,6 @@ public class TourActivity extends AppCompatActivity {
 
     public int getZone(double latitude, double longitude){
         //TJ 38.8184974,-77.168681
-        //polygon
-        /*
-        p1  38.818341, -77.168650
-        p2  38.818050, -77.168066
-        p3  38.818631, -77.167492
-        p4  38.818500, -77.167223
-        p5  38.817069, -77.167970
-        p6  38.817238, -77.168886
-        p7  38.817660, -77.169636
-
-         */
-
         for(int cnt = 0; cnt < polygons.length; cnt++) {
             int intersections = numberOfLinesCrossed(polygons[cnt], latitude, longitude);
             Toast.makeText(TourActivity.this, intersections + "", Toast.LENGTH_SHORT).show();
@@ -138,19 +154,6 @@ public class TourActivity extends AppCompatActivity {
             }
         }
         return 1;
-
-/*
-        if(latitude < 38.8184974 && longitude < -77.168681){
-            return 0;
-        } else if(latitude > 38.8184974 && longitude < -77.168681){
-            return 1;
-        } else if(latitude < 38.8184974 && longitude > -77.168681){
-            return 2;
-        } else if(latitude > 38.8184974 && longitude > -77.168681) {
-            return 3;
-        } else {
-            return -1;
-        }*/
     }
 
     public int getResidFromZone(int zone){
@@ -194,5 +197,15 @@ public class TourActivity extends AppCompatActivity {
             }
         }
         return intersections;
+    }
+
+    public void populateLinearLayoutTranscript(HashMap<Integer, String> transcript){
+        String[] transcriptArray = transcript.values().toArray(new String[transcript.size()]);
+        for(int cnt = 0; cnt < transcriptArray.length; cnt++){
+            TextView textView = new TextView(this);
+            textView.setText(transcriptArray[cnt]);
+            textView.setTextColor(Color.WHITE);
+            linearLayoutTranscript.addView(textView);
+        }
     }
 }
