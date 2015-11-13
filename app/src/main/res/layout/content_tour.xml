@@ -33,5 +33,6 @@
         android:layout_height="match_parent"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:id="@+id/linearLayoutTranscript"></LinearLayout>
+        android:id="@+id/linearLayoutTranscript"
+        android:layout_above="@+id/playButton"></LinearLayout>
 </RelativeLayout>

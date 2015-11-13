@@ -8,10 +8,12 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -21,7 +23,11 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeMap;
 
 public class TourActivity extends AppCompatActivity {
     private int currentZone = -1;
@@ -29,6 +35,8 @@ public class TourActivity extends AppCompatActivity {
     private ImageButton playButton;
     private LinearLayout linearLayoutTranscript;
     private int cnt = 0;
+    private Timer audioProgressTimer;
+    private int audioProgress = 0;
     double[][][] polygons = {{{38.818441, -77.168650},
             {38.818631, -77.167492},
             {38.818500, -77.167223},
@@ -56,10 +64,11 @@ public class TourActivity extends AppCompatActivity {
         mp = MediaPlayer.create(TourActivity.this, R.raw.paradise);
         playButton = (ImageButton)findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout)findViewById(R.id.linearLayoutTranscript);
+        audioProgressTimer = new Timer();
 
         //populate
         BufferedReader bufferedReader = null;
-        HashMap<Integer, String> transcript = new HashMap<>();
+        final TreeMap<Integer, String> transcript = new TreeMap<>();
         try {
             bufferedReader = new BufferedReader(new InputStreamReader(getAssets().open("transcript.txt")));
             String line;
@@ -80,7 +89,8 @@ public class TourActivity extends AppCompatActivity {
         }
         populateLinearLayoutTranscript(transcript);
 
-        //linearLayoutTranscript.addView()
+        //runnable handler
+
 
         //listeners
         playButton.setOnClickListener(new View.OnClickListener() {
@@ -142,6 +152,15 @@ public class TourActivity extends AppCompatActivity {
         } else {
             Toast.makeText(TourActivity.this, "turn on your GPS", Toast.LENGTH_SHORT).show();
         }
+
+         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+             @Override
+             public void onCompletion(MediaPlayer mp) {
+                 mp.stop();
+                 mp.release();
+                 playButton.setBackgroundResource(R.drawable.play);
+             }
+         });
     }
 
     public int getZone(double latitude, double longitude){
@@ -174,6 +193,7 @@ public class TourActivity extends AppCompatActivity {
         mp.stop();
         mp.reset();
         mp = MediaPlayer.create(TourActivity.this, resid);
+        playButton.setBackgroundResource(R.drawable.pause);
         mp.start();
     }
 
@@ -199,12 +219,15 @@ public class TourActivity extends AppCompatActivity {
         return intersections;
     }
 
-    public void populateLinearLayoutTranscript(HashMap<Integer, String> transcript){
+    public void populateLinearLayoutTranscript(TreeMap<Integer, String> transcript){
         String[] transcriptArray = transcript.values().toArray(new String[transcript.size()]);
         for(int cnt = 0; cnt < transcriptArray.length; cnt++){
             TextView textView = new TextView(this);
+            textView.setId(585858+cnt);
             textView.setText(transcriptArray[cnt]);
             textView.setTextColor(Color.WHITE);
+            textView.setTextSize(16);
+            textView.setGravity(Gravity.CENTER_HORIZONTAL);
             linearLayoutTranscript.addView(textView);
         }
     }
