@@ -13,6 +13,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -37,6 +38,8 @@ public class TourActivity extends AppCompatActivity {
     private int cnt = 0;
     private Timer audioProgressTimer;
     private int audioProgress = 0;
+    private Handler audioHandler;
+    private Runnable audioRunnable;
     double[][][] polygons = {{{38.818441, -77.168650},
             {38.818631, -77.167492},
             {38.818500, -77.167223},
@@ -90,7 +93,17 @@ public class TourActivity extends AppCompatActivity {
         populateLinearLayoutTranscript(transcript);
 
         //runnable handler
-
+        audioHandler = new Handler();
+        audioRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if(mp.isPlaying()) {
+                    audioProgress += 1;
+                    highlightTranscript(transcript);
+                    audioHandler.postDelayed(this, 1000);
+                }
+            }
+        };
 
         //listeners
         playButton.setOnClickListener(new View.OnClickListener() {
@@ -98,9 +111,11 @@ public class TourActivity extends AppCompatActivity {
             public void onClick(View v) {
                 if(mp.isPlaying()){
                     mp.pause();
+                    audioHandler.removeCallbacks(audioRunnable);
                     playButton.setBackgroundResource(R.drawable.play);
                 } else {
                     mp.start();
+                    audioHandler.postDelayed(audioRunnable, 1000);
                     playButton.setBackgroundResource(R.drawable.pause);
                 }
             }
@@ -158,6 +173,8 @@ public class TourActivity extends AppCompatActivity {
              public void onCompletion(MediaPlayer mp) {
                  mp.stop();
                  mp.release();
+                 audioHandler.removeCallbacks(audioRunnable);
+                 audioProgress = 0;
                  playButton.setBackgroundResource(R.drawable.play);
              }
          });
@@ -189,12 +206,15 @@ public class TourActivity extends AppCompatActivity {
         }
     }
 
-    public void playAudio(int resid){
+    public void playAudio(int resid) {
         mp.stop();
         mp.reset();
+        audioHandler.removeCallbacks(audioRunnable);
+        audioProgress = 0;
         mp = MediaPlayer.create(TourActivity.this, resid);
         playButton.setBackgroundResource(R.drawable.pause);
         mp.start();
+        audioHandler.postDelayed(audioRunnable, 1000);
     }
 
     public int numberOfLinesCrossed(double[][] polygon, double latitude, double longitude){
@@ -223,12 +243,23 @@ public class TourActivity extends AppCompatActivity {
         String[] transcriptArray = transcript.values().toArray(new String[transcript.size()]);
         for(int cnt = 0; cnt < transcriptArray.length; cnt++){
             TextView textView = new TextView(this);
-            textView.setId(585858+cnt);
             textView.setText(transcriptArray[cnt]);
             textView.setTextColor(Color.WHITE);
             textView.setTextSize(16);
             textView.setGravity(Gravity.CENTER_HORIZONTAL);
             linearLayoutTranscript.addView(textView);
+        }
+    }
+
+    public void highlightTranscript(TreeMap<Integer, String> transcript){
+        if(transcript.containsKey(audioProgress)){
+            int indexOfChild = Arrays.binarySearch(transcript.keySet().toArray(), audioProgress);
+            if(indexOfChild != 0) {
+                linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(Color.BLACK);
+                ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.WHITE);
+            }
+            linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundColor(Color.YELLOW);
+            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.BLACK);
         }
     }
 }
