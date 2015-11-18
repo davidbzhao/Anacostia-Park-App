@@ -1,5 +1,6 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.app.ActionBar;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -16,9 +17,11 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.BufferedReader;
@@ -40,6 +43,7 @@ public class TourActivity extends AppCompatActivity {
     private int audioProgress = 0;
     private Handler audioHandler;
     private Runnable audioRunnable;
+
     double[][][] polygons = {{{38.818441, -77.168650},
             {38.818631, -77.167492},
             {38.818500, -77.167223},
@@ -100,7 +104,7 @@ public class TourActivity extends AppCompatActivity {
                 if(mp.isPlaying()) {
                     audioProgress += 1;
                     highlightTranscript(transcript);
-                    audioHandler.postDelayed(this, 1000);
+                    audioHandler.postDelayed(this, 250); //should be 1000, changed to 250 to make testing quicker
                 }
             }
         };
@@ -115,6 +119,7 @@ public class TourActivity extends AppCompatActivity {
                     playButton.setBackgroundResource(R.drawable.play);
                 } else {
                     mp.start();
+                    highlightTranscript(transcript);
                     audioHandler.postDelayed(audioRunnable, 1000);
                     playButton.setBackgroundResource(R.drawable.pause);
                 }
@@ -245,21 +250,34 @@ public class TourActivity extends AppCompatActivity {
             TextView textView = new TextView(this);
             textView.setText(transcriptArray[cnt]);
             textView.setTextColor(Color.WHITE);
-            textView.setTextSize(16);
+            textView.setTextSize(18);
             textView.setGravity(Gravity.CENTER_HORIZONTAL);
+            textView.setPadding(0, 5, 0, 5);
             linearLayoutTranscript.addView(textView);
         }
     }
 
     public void highlightTranscript(TreeMap<Integer, String> transcript){
         if(transcript.containsKey(audioProgress)){
-            int indexOfChild = Arrays.binarySearch(transcript.keySet().toArray(), audioProgress);
+            final int indexOfChild = Arrays.binarySearch(transcript.keySet().toArray(), audioProgress);
             if(indexOfChild != 0) {
                 linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(Color.BLACK);
+                linearLayoutTranscript.getChildAt(indexOfChild - 1).setPadding(0, 5, 0, 5);
                 ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.WHITE);
+                ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextSize(18);
+                ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setGravity(Gravity.CENTER_HORIZONTAL);
             }
             linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundColor(Color.YELLOW);
+            linearLayoutTranscript.getChildAt(indexOfChild).setPadding(0, 10, 0, 10);
             ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.BLACK);
+            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextSize(22);
+            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setGravity(Gravity.CENTER);
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    ((ScrollView)findViewById(R.id.scrollViewTranscript)).scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView)findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
+                }
+            });
         }
     }
 }
