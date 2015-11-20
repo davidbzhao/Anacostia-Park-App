@@ -44,6 +44,7 @@ public class TourActivity extends AppCompatActivity {
     private int audioProgress = 0;
     private Handler audioHandler;
     private Runnable audioRunnable;
+    private TreeMap<Integer, String> transcript;
 
     double[][][] polygons = {{{38.818441, -77.168650},
             {38.818631, -77.167492},
@@ -73,82 +74,70 @@ public class TourActivity extends AppCompatActivity {
         playButton = (ImageButton)findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout)findViewById(R.id.linearLayoutTranscript);
         audioProgressTimer = new Timer();
-
-        //populate
-        BufferedReader bufferedReader = null;
-        final TreeMap<Integer, String> transcript = new TreeMap<>();
-        try {
-            bufferedReader = new BufferedReader(new InputStreamReader(getAssets().open("transcript.txt")));
-            String line;
-            while((line = bufferedReader.readLine()) != null){
-                String[] splitLine = line.split("=");
-                transcript.put(Integer.parseInt(splitLine[0]), splitLine[1]);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            if(bufferedReader != null){
-                try {
-                    bufferedReader.close();
-                } catch(IOException e){
-
-                }
-            }
-        }
-        populateLinearLayoutTranscript(transcript);
-
-        //runnable handler
         audioHandler = new Handler();
         audioRunnable = new Runnable() {
             @Override
             public void run() {
                 if(mp.isPlaying()) {
                     audioProgress += 1;
-                    highlightTranscript(transcript);
+                    highlightTranscript();
                     audioHandler.postDelayed(this, 250); //should be 1000, changed to 250 to make testing quicker
                 }
             }
         };
 
-        //listeners
-        playButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(mp.isPlaying()){
-                    mp.pause();
-                    audioHandler.removeCallbacks(audioRunnable);
-                    playButton.setBackgroundResource(R.drawable.play);
-                } else {
-                    mp.start();
-                    highlightTranscript(transcript);
-                    audioHandler.postDelayed(audioRunnable, 1000);
-                    playButton.setBackgroundResource(R.drawable.pause);
-                }
-            }
-        });
+        /*
+        note: dropdown for zone?
+
+        If location changes,
+            If enters new zone,
+                If audio is playing,
+                    (should not happen)
+                If audio is not playing,
+                    audioProgress reset to 0
+                    populate transcript map
+                    populate linear layout
+                    play new zone audio
+                    postdelayed highlight function
+                currentZone = zone
+        If playButton is clicked,
+            If audio is not playing,
+                If transcript filled,
+                    play audio
+                    postdelayed highlight function
+            If audio is playing,
+                Audio paused
+        If new zone manually selected,
+            audioProgress reset to 0
+            populate transcript map
+            populate linear layout
+        */
 
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
-            /*
-            If location changes,
-                If enters new zone,
-                    If audio is playing,
-                        (should not happen) skip this zone
-                    If audio is not playing,
-                        play new zone audio
-                If do not enter new zone,
-                    do nothing
-            */
+            //----------------------------------------------------------------------------------------------------If location changes,
             @Override
             public void onLocationChanged(Location location) {
                 Button triggerButton = (Button)findViewById(R.id.triggerButton);
                 triggerButton.setText(location.getLatitude() + "," + location.getLongitude());
                 Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
                 int zone = getZone(location.getLatitude(), location.getLongitude());
+                //--------------------------------------------------------------------------------------------------------If enters new zone,
                 if(currentZone != zone){
+                    //--------------------------------------------------------------------------------------------------------If audio is not playing,
                     if(!mp.isPlaying()) {
+                        //--------------------------------------------------------------------------------------------------------audioProgress reset to 0
+                        audioProgress = 0;
+                        //--------------------------------------------------------------------------------------------------------populate transcript map
+                        transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
+                        //--------------------------------------------------------------------------------------------------------populate linear layout
+                        populateLinearLayoutTranscript();
+                        //--------------------------------------------------------------------------------------------------------play new zone audio
                         playAudio(getResidFromZone(zone));
+                        //--------------------------------------------------------------------------------------------------------postdelayed highlight function
+                        audioHandler.postDelayed(audioRunnable, 1000);
                     }
+                    //--------------------------------------------------------------------------------------------------------currentZone = zone
                     currentZone = zone;
                 }
             }
@@ -174,12 +163,36 @@ public class TourActivity extends AppCompatActivity {
             Toast.makeText(TourActivity.this, "turn on your GPS", Toast.LENGTH_SHORT).show();
         }
 
+
+        //----------------------------------------------------------------------------------------------------If play button is clicked,
+        //listeners
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //----------------------------------------------------------------------------------------------------If audio is not playing,
+                if(!mp.isPlaying()){
+                    //----------------------------------------------------------------------------------------------------If transcript filled,
+                    if(linearLayoutTranscript.getChildCount() > 0){
+                        //----------------------------------------------------------------------------------------------------play audio
+                        playAudio(getResidFromZone(currentZone));
+                        playButton.setBackgroundResource(R.drawable.pause);
+                        //----------------------------------------------------------------------------------------------------postDelayed highlight function
+                        highlightTranscript();
+                    }
+                //----------------------------------------------------------------------------------------------------If audio is playing,
+                } else {
+                    //----------------------------------------------------------------------------------------------------pause audio
+                    mp.pause();
+                    playButton.setBackgroundResource(R.drawable.play);
+                }
+            }
+        });
+
          mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
              @Override
              public void onCompletion(MediaPlayer mp) {
                  mp.stop();
                  mp.release();
-                 audioHandler.removeCallbacks(audioRunnable);
                  audioProgress = 0;
                  playButton.setBackgroundResource(R.drawable.play);
              }
@@ -212,10 +225,23 @@ public class TourActivity extends AppCompatActivity {
         }
     }
 
+    public String getFilenameFromZone(int zone){
+        if(zone == 0){
+            return "transcript.txt";
+        } else if(zone == 1){
+            return "transcript.txt";
+        } else if(zone == 2){
+            return "transcript.txt";
+        } else {
+            return "transcript.txt";
+        }
+    }
+
     public void playAudio(int resid) {
-        mp.stop();
+        if(mp.isPlaying()) {
+            mp.stop();
+        }
         mp.reset();
-        audioHandler.removeCallbacks(audioRunnable);
         audioProgress = 0;
         mp = MediaPlayer.create(TourActivity.this, resid);
         playButton.setBackgroundResource(R.drawable.pause);
@@ -245,7 +271,31 @@ public class TourActivity extends AppCompatActivity {
         return intersections;
     }
 
-    public void populateLinearLayoutTranscript(TreeMap<Integer, String> transcript){
+    public TreeMap<Integer, String> getTranscriptFromTextFile(String filename){
+        BufferedReader bufferedReader = null;
+        final TreeMap<Integer, String> transcript = new TreeMap<>();
+        try {
+            bufferedReader = new BufferedReader(new InputStreamReader(getAssets().open(filename)));
+            String line;
+            while((line = bufferedReader.readLine()) != null){
+                String[] splitLine = line.split("=");
+                transcript.put(Integer.parseInt(splitLine[0]), splitLine[1]);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if(bufferedReader != null){
+                try {
+                    bufferedReader.close();
+                } catch(IOException e){
+
+                }
+            }
+        }
+        return transcript;
+    }
+
+    public void populateLinearLayoutTranscript(){
         String[] transcriptArray = transcript.values().toArray(new String[transcript.size()]);
         for(int cnt = 0; cnt < transcriptArray.length; cnt++){
             TextView textView = new TextView(this);
@@ -259,7 +309,7 @@ public class TourActivity extends AppCompatActivity {
         }
     }
 
-    public void highlightTranscript(TreeMap<Integer, String> transcript){
+    public void highlightTranscript(){
         if(transcript.containsKey(audioProgress)){
             final int indexOfChild = Arrays.binarySearch(transcript.keySet().toArray(), audioProgress);
             if(indexOfChild != 0) {
