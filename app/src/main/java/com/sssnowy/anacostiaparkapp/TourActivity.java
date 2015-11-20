@@ -177,7 +177,7 @@ public class TourActivity extends AppCompatActivity {
                         playAudio(getResidFromZone(currentZone));
                         playButton.setBackgroundResource(R.drawable.pause);
                         //----------------------------------------------------------------------------------------------------postDelayed highlight function
-                        highlightTranscript();
+                        audioHandler.postDelayed(audioRunnable, 1000);
                     }
                 //----------------------------------------------------------------------------------------------------If audio is playing,
                 } else {
@@ -217,7 +217,7 @@ public class TourActivity extends AppCompatActivity {
         if(zone == 0){
             return R.raw.paradise;
         } else if(zone == 1){
-            return R.raw.barnum;
+            return R.raw.barnum; 
         } else if(zone == 2){
             return R.raw.empire;
         } else {
@@ -242,11 +242,8 @@ public class TourActivity extends AppCompatActivity {
             mp.stop();
         }
         mp.reset();
-        audioProgress = 0;
         mp = MediaPlayer.create(TourActivity.this, resid);
-        playButton.setBackgroundResource(R.drawable.pause);
         mp.start();
-        audioHandler.postDelayed(audioRunnable, 1000);
     }
 
     public int numberOfLinesCrossed(double[][] polygon, double latitude, double longitude){
