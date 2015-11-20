@@ -34,7 +34,8 @@
         android:id="@+id/scrollViewTranscript"
         android:layout_above="@+id/playButton"
         android:fillViewport="false"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:background="@color/aws_colorDark">
 
         <LinearLayout
             android:orientation="vertical"
@@ -43,7 +44,8 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:id="@+id/linearLayoutTranscript"
-            android:layout_above="@+id/playButton"></LinearLayout>
+            android:layout_above="@+id/playButton"
+            android:gravity="center_horizontal"></LinearLayout>
     </ScrollView>
 
 </RelativeLayout>

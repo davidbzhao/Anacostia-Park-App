@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -249,10 +250,11 @@ public class TourActivity extends AppCompatActivity {
         for(int cnt = 0; cnt < transcriptArray.length; cnt++){
             TextView textView = new TextView(this);
             textView.setText(transcriptArray[cnt]);
-            textView.setTextColor(Color.WHITE);
+            textView.setTextColor(Color.parseColor("#66FFFFFF"));
             textView.setTextSize(18);
             textView.setGravity(Gravity.CENTER_HORIZONTAL);
-            textView.setPadding(0, 5, 0, 5);
+            textView.setPadding(5, 5, 5, 5);
+            textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             linearLayoutTranscript.addView(textView);
         }
     }
@@ -261,16 +263,17 @@ public class TourActivity extends AppCompatActivity {
         if(transcript.containsKey(audioProgress)){
             final int indexOfChild = Arrays.binarySearch(transcript.keySet().toArray(), audioProgress);
             if(indexOfChild != 0) {
-                linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(Color.BLACK);
+                linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(ContextCompat.getColor(this, R.color.aws_colorDark));
                 linearLayoutTranscript.getChildAt(indexOfChild - 1).setPadding(0, 5, 0, 5);
-                ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.WHITE);
+                ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.parseColor("#66FFFFFF"));
                 ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextSize(18);
                 ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setGravity(Gravity.CENTER_HORIZONTAL);
             }
-            linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundColor(Color.YELLOW);
-            linearLayoutTranscript.getChildAt(indexOfChild).setPadding(0, 10, 0, 10);
-            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.BLACK);
-            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextSize(22);
+            linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundResource(R.drawable.rounded_corner);
+            //linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundColor(Color.parseColor("#666666"));
+            //linearLayoutTranscript.getChildAt(indexOfChild).setPadding(0, 10, 0, 10);
+            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.parseColor("#FFFFFF"));
+            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextSize(20);
             ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setGravity(Gravity.CENTER);
             new Handler().post(new Runnable() {
                 @Override
