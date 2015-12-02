@@ -1,6 +1,7 @@
 package com.sssnowy.anacostiaparkapp;
 
 import android.app.ActionBar;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -8,8 +9,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
@@ -36,22 +39,25 @@ import java.util.TreeMap;
 
 public class TourActivity extends AppCompatActivity {
     private int currentZone = -1;
-    public MediaPlayer mp;
+    private static MediaPlayer mp;
     private ImageButton playButton;
     private LinearLayout linearLayoutTranscript;
     private int cnt = 0;
-    private Timer audioProgressTimer;
-    private int audioProgress = 0;
     private Handler audioHandler;
     private Runnable audioRunnable;
     private TreeMap<Integer, String> transcript;
 
-    double[][][] polygons = {{{38.818441, -77.168650},
-            {38.818631, -77.167492},
-            {38.818500, -77.167223},
-            {38.817069, -77.167970},
-            {38.817238, -77.168886},
-            {38.817660, -77.169636}}};
+    double[][][] polygons = {
+            {{38.819745, -77.170083},
+            {38.819711, -77.168661},
+            {38.819189, -77.166832},
+            {38.816568, -77.168307},
+            {38.817754, -77.170129}},
+            {{38.820163, -77.169949},
+            {38.819164, -77.166381},
+            {38.822182, -77.165636},
+            {38.822169, -77.169965}}
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,18 +76,19 @@ public class TourActivity extends AppCompatActivity {
         });
 
         //initialize
-        mp = MediaPlayer.create(TourActivity.this, R.raw.paradise);
+//        mp = MediaPlayer.create(TourActivity.this, R.raw.paradise);
+        mp = MediaPlayerSingleton.getInstance(TourActivity.this);
+        Log.e("","MP : " + mp);
+        Log.e("","MP : " + mp.isPlaying());
         playButton = (ImageButton)findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout)findViewById(R.id.linearLayoutTranscript);
-        audioProgressTimer = new Timer();
         audioHandler = new Handler();
         audioRunnable = new Runnable() {
             @Override
             public void run() {
                 if(mp.isPlaying()) {
-                    audioProgress += 1;
                     highlightTranscript();
-                    audioHandler.postDelayed(this, 250); //should be 1000, changed to 250 to make testing quicker
+                    audioHandler.postDelayed(this, 100);
                 }
             }
         };
@@ -126,16 +133,16 @@ public class TourActivity extends AppCompatActivity {
                 if(currentZone != zone){
                     //--------------------------------------------------------------------------------------------------------If audio is not playing,
                     if(!mp.isPlaying()) {
-                        //--------------------------------------------------------------------------------------------------------audioProgress reset to 0
-                        audioProgress = 0;
                         //--------------------------------------------------------------------------------------------------------populate transcript map
                         transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
                         //--------------------------------------------------------------------------------------------------------populate linear layout
                         populateLinearLayoutTranscript();
                         //--------------------------------------------------------------------------------------------------------play new zone audio
                         playAudio(getResidFromZone(zone));
+                        playButton.setBackgroundResource(R.drawable.pause);
                         //--------------------------------------------------------------------------------------------------------postdelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
+                        MediaPlayerSingleton.setZonePlaying(zone);
                     }
                     //--------------------------------------------------------------------------------------------------------currentZone = zone
                     currentZone = zone;
@@ -170,16 +177,16 @@ public class TourActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //----------------------------------------------------------------------------------------------------If audio is not playing,
-                if(!mp.isPlaying()){
+                if (!mp.isPlaying()) {
                     //----------------------------------------------------------------------------------------------------If transcript filled,
-                    if(linearLayoutTranscript.getChildCount() > 0){
+                    if (linearLayoutTranscript.getChildCount() > 0) {
                         //----------------------------------------------------------------------------------------------------play audio
-                        playAudio(getResidFromZone(currentZone));
+                        mp.start();
                         playButton.setBackgroundResource(R.drawable.pause);
                         //----------------------------------------------------------------------------------------------------postDelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
                     }
-                //----------------------------------------------------------------------------------------------------If audio is playing,
+                    //----------------------------------------------------------------------------------------------------If audio is playing,
                 } else {
                     //----------------------------------------------------------------------------------------------------pause audio
                     mp.pause();
@@ -187,16 +194,6 @@ public class TourActivity extends AppCompatActivity {
                 }
             }
         });
-
-         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-             @Override
-             public void onCompletion(MediaPlayer mp) {
-                 mp.stop();
-                 mp.release();
-                 audioProgress = 0;
-                 playButton.setBackgroundResource(R.drawable.play);
-             }
-         });
     }
 
     public int getZone(double latitude, double longitude){
@@ -215,19 +212,19 @@ public class TourActivity extends AppCompatActivity {
         Button triggerButton = (Button)findViewById(R.id.triggerButton);
         triggerButton.setText(triggerButton.getText() + " " + zone);
         if(zone == 0){
-            return R.raw.paradise;
+            return R.raw.greyarea;
         } else if(zone == 1){
-            return R.raw.barnum; 
+            return R.raw.paradise;
         } else if(zone == 2){
-            return R.raw.empire;
+            return R.raw.barnum;
         } else {
-            return R.raw.empire;
+            return R.raw.barnum;
         }
     }
 
     public String getFilenameFromZone(int zone){
         if(zone == 0){
-            return "transcript.txt";
+            return "greyarea.txt";
         } else if(zone == 1){
             return "transcript.txt";
         } else if(zone == 2){
@@ -238,11 +235,8 @@ public class TourActivity extends AppCompatActivity {
     }
 
     public void playAudio(int resid) {
-        if(mp.isPlaying()) {
-            mp.stop();
-        }
         mp.reset();
-        mp = MediaPlayer.create(TourActivity.this, resid);
+        mp = MediaPlayerSingleton.setInstance(TourActivity.this, resid);
         mp.start();
     }
 
@@ -307,27 +301,35 @@ public class TourActivity extends AppCompatActivity {
     }
 
     public void highlightTranscript(){
-        if(transcript.containsKey(audioProgress)){
-            final int indexOfChild = Arrays.binarySearch(transcript.keySet().toArray(), audioProgress);
-            if(indexOfChild != 0) {
-                linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(ContextCompat.getColor(this, R.color.aws_colorDark));
-                linearLayoutTranscript.getChildAt(indexOfChild - 1).setPadding(0, 5, 0, 5);
-                ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.parseColor("#66FFFFFF"));
-                ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextSize(18);
-                ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setGravity(Gravity.CENTER_HORIZONTAL);
-            }
-            linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundResource(R.drawable.rounded_corner);
-            //linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundColor(Color.parseColor("#666666"));
-            //linearLayoutTranscript.getChildAt(indexOfChild).setPadding(0, 10, 0, 10);
-            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.parseColor("#FFFFFF"));
-            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextSize(20);
-            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setGravity(Gravity.CENTER);
-            new Handler().post(new Runnable() {
-                @Override
-                public void run() {
-                    ((ScrollView)findViewById(R.id.scrollViewTranscript)).scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView)findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
-                }
-            });
+        final int indexOfChild = getIndexFromAudioProgress();
+        if(indexOfChild != 0) {
+            linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(ContextCompat.getColor(this, R.color.aws_colorDark));
+            linearLayoutTranscript.getChildAt(indexOfChild - 1).setPadding(0, 5, 0, 5);
+            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.parseColor("#66FFFFFF"));
+            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextSize(18);
+            ((TextView)linearLayoutTranscript.getChildAt(indexOfChild - 1)).setGravity(Gravity.CENTER_HORIZONTAL);
         }
+        linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundResource(R.drawable.rounded_corner);
+        //linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundColor(Color.parseColor("#666666"));
+        //linearLayoutTranscript.getChildAt(indexOfChild).setPadding(0, 10, 0, 10);
+        ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.parseColor("#FFFFFF"));
+        ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setTextSize(20);
+        ((TextView)linearLayoutTranscript.getChildAt(indexOfChild)).setGravity(Gravity.CENTER);
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                ((ScrollView) findViewById(R.id.scrollViewTranscript)).scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView) findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
+            }
+        });
+    }
+
+    public int getIndexFromAudioProgress(){
+        Integer[] transcriptTimes = transcript.keySet().toArray(new Integer[transcript.keySet().size()]);
+        for(int cnt = 0; cnt < transcriptTimes.length; cnt++){
+            if(transcriptTimes[cnt] > mp.getCurrentPosition()){
+                return cnt - 1;
+            }
+        }
+        return transcriptTimes.length - 1;
     }
 }
