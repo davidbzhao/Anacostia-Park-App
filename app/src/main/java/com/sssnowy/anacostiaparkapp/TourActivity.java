@@ -3,6 +3,7 @@ package com.sssnowy.anacostiaparkapp;
 import android.app.ActionBar;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -76,10 +77,7 @@ public class TourActivity extends AppCompatActivity {
         });
 
         //initialize
-//        mp = MediaPlayer.create(TourActivity.this, R.raw.paradise);
-        mp = MediaPlayerSingleton.getInstance(TourActivity.this);
-        Log.e("","MP : " + mp);
-        Log.e("","MP : " + mp.isPlaying());
+        mp = MediaPlayer.create(TourActivity.this, R.raw.empirestateofmind);
         playButton = (ImageButton)findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout)findViewById(R.id.linearLayoutTranscript);
         audioHandler = new Handler();
@@ -142,7 +140,6 @@ public class TourActivity extends AppCompatActivity {
                         playButton.setBackgroundResource(R.drawable.pause);
                         //--------------------------------------------------------------------------------------------------------postdelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
-                        MediaPlayerSingleton.setZonePlaying(zone);
                     }
                     //--------------------------------------------------------------------------------------------------------currentZone = zone
                     currentZone = zone;
@@ -176,6 +173,10 @@ public class TourActivity extends AppCompatActivity {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+//                startService(new Intent(MusicService.ACTION_PLAY));
+                Intent msIntent = new Intent(TourActivity.this, MusicService.class);
+                msIntent.setAction(MusicService.ACTION_PLAY);
+                startService(msIntent);
                 //----------------------------------------------------------------------------------------------------If audio is not playing,
                 if (!mp.isPlaying()) {
                     //----------------------------------------------------------------------------------------------------If transcript filled,
@@ -214,11 +215,11 @@ public class TourActivity extends AppCompatActivity {
         if(zone == 0){
             return R.raw.greyarea;
         } else if(zone == 1){
-            return R.raw.paradise;
+            return R.raw.empirestateofmind;
         } else if(zone == 2){
-            return R.raw.barnum;
+            return R.raw.paradise;
         } else {
-            return R.raw.barnum;
+            return R.raw.paradise;
         }
     }
 
@@ -226,17 +227,17 @@ public class TourActivity extends AppCompatActivity {
         if(zone == 0){
             return "greyarea.txt";
         } else if(zone == 1){
-            return "transcript.txt";
+            return "empirestateofmind.txt";
         } else if(zone == 2){
-            return "transcript.txt";
+            return "paradise.txt";
         } else {
-            return "transcript.txt";
+            return "paradise.txt";
         }
     }
 
     public void playAudio(int resid) {
         mp.reset();
-        mp = MediaPlayerSingleton.setInstance(TourActivity.this, resid);
+        mp = MediaPlayer.create(TourActivity.this, resid);
         mp.start();
     }
 
@@ -332,4 +333,6 @@ public class TourActivity extends AppCompatActivity {
         }
         return transcriptTimes.length - 1;
     }
+
+
 }

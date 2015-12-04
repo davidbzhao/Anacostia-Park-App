@@ -85,9 +85,4 @@ public class MenuActivity extends AppCompatActivity {
             b6.setHeight(b6.getWidth());
         }
     }
-
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState){
-
-    }
 }
