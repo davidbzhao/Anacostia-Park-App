@@ -25,10 +25,8 @@
             android:label="@string/title_activity_tour"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
-        <service android:name=".MusicService">
-            <intent-filter>
-                <action android:name="com.sssnowy.anacostiaparkapp.action.ACTION_PLAY" />
-            </intent-filter>
+        <service android:name=".MusicService"
+            android:exported="false">
         </service>
     </application>
 

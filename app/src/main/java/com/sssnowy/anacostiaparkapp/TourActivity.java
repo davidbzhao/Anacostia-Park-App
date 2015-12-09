@@ -1,9 +1,11 @@
 package com.sssnowy.anacostiaparkapp;
 
 import android.app.ActionBar;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -13,6 +15,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -40,13 +43,15 @@ import java.util.TreeMap;
 
 public class TourActivity extends AppCompatActivity {
     private int currentZone = -1;
-    private static MediaPlayer mp;
     private ImageButton playButton;
     private LinearLayout linearLayoutTranscript;
     private int cnt = 0;
     private Handler audioHandler;
     private Runnable audioRunnable;
     private TreeMap<Integer, String> transcript;
+    private MusicService musicService;
+    private boolean serviceBound = false;
+    private ServiceConnection serviceConnection;
 
     double[][][] polygons = {
             {{38.819745, -77.170083},
@@ -77,14 +82,13 @@ public class TourActivity extends AppCompatActivity {
         });
 
         //initialize
-        mp = MediaPlayer.create(TourActivity.this, R.raw.empirestateofmind);
         playButton = (ImageButton)findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout)findViewById(R.id.linearLayoutTranscript);
         audioHandler = new Handler();
         audioRunnable = new Runnable() {
             @Override
             public void run() {
-                if(mp.isPlaying()) {
+                if(musicService.isPlaying()) {
                     highlightTranscript();
                     audioHandler.postDelayed(this, 100);
                 }
@@ -130,13 +134,15 @@ public class TourActivity extends AppCompatActivity {
                 //--------------------------------------------------------------------------------------------------------If enters new zone,
                 if(currentZone != zone){
                     //--------------------------------------------------------------------------------------------------------If audio is not playing,
-                    if(!mp.isPlaying()) {
+                    if(!musicService.isPlaying()) {
                         //--------------------------------------------------------------------------------------------------------populate transcript map
                         transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
                         //--------------------------------------------------------------------------------------------------------populate linear layout
                         populateLinearLayoutTranscript();
                         //--------------------------------------------------------------------------------------------------------play new zone audio
-                        playAudio(getResidFromZone(zone));
+                        musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+                        musicService.playAudio();
+//                        playAudio(getResidFromZone(zone));
                         playButton.setBackgroundResource(R.drawable.pause);
                         //--------------------------------------------------------------------------------------------------------postdelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
@@ -174,15 +180,15 @@ public class TourActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 //                startService(new Intent(MusicService.ACTION_PLAY));
-                Intent msIntent = new Intent(TourActivity.this, MusicService.class);
-                msIntent.setAction(MusicService.ACTION_PLAY);
-                startService(msIntent);
+//                Intent msIntent = new Intent(TourActivity.this, MusicService.class)
+//                msIntent.setAction("com.sssnowy.anacostiaparkapp.action.ACTION_PLAY");
+//                startService(msIntent);
                 //----------------------------------------------------------------------------------------------------If audio is not playing,
-                if (!mp.isPlaying()) {
+                if (!musicService.isPlaying()) {
                     //----------------------------------------------------------------------------------------------------If transcript filled,
                     if (linearLayoutTranscript.getChildCount() > 0) {
                         //----------------------------------------------------------------------------------------------------play audio
-                        mp.start();
+                        musicService.playAudio();
                         playButton.setBackgroundResource(R.drawable.pause);
                         //----------------------------------------------------------------------------------------------------postDelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
@@ -190,11 +196,46 @@ public class TourActivity extends AppCompatActivity {
                     //----------------------------------------------------------------------------------------------------If audio is playing,
                 } else {
                     //----------------------------------------------------------------------------------------------------pause audio
-                    mp.pause();
+                    musicService.pauseAudio();
                     playButton.setBackgroundResource(R.drawable.play);
                 }
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent msIntent = new Intent(getApplicationContext(), MusicService.class);
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Toast.makeText(TourActivity.this, "Service connected", Toast.LENGTH_SHORT).show();
+                MusicService.LocalBinder localBinder = (MusicService.LocalBinder)service;
+                musicService = localBinder.getServiceInstance();
+                serviceBound = true;
+                Log.e("","Service Connected");
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                Toast.makeText(TourActivity.this, "Service disconnected", Toast.LENGTH_SHORT).show();
+                musicService = null;
+                serviceBound = false;
+                Log.e("", "Service Disconnected");
+            }
+        };
+        bindService(msIntent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        audioHandler.removeCallbacks(audioRunnable);
+        if(serviceBound){
+            unbindService(serviceConnection);
+            serviceBound = false;
+        }
     }
 
     public int getZone(double latitude, double longitude){
@@ -235,11 +276,11 @@ public class TourActivity extends AppCompatActivity {
         }
     }
 
-    public void playAudio(int resid) {
-        mp.reset();
-        mp = MediaPlayer.create(TourActivity.this, resid);
-        mp.start();
-    }
+//    public void playAudio(int resid) {
+//        mp.reset();
+//        mp = MediaPlayer.create(TourActivity.this, resid);
+//        mp.start();
+//    }
 
     public int numberOfLinesCrossed(double[][] polygon, double latitude, double longitude){
         int intersections = 0;
@@ -327,7 +368,7 @@ public class TourActivity extends AppCompatActivity {
     public int getIndexFromAudioProgress(){
         Integer[] transcriptTimes = transcript.keySet().toArray(new Integer[transcript.keySet().size()]);
         for(int cnt = 0; cnt < transcriptTimes.length; cnt++){
-            if(transcriptTimes[cnt] > mp.getCurrentPosition()){
+            if(transcriptTimes[cnt] > musicService.getCurrentPosition()){
                 return cnt - 1;
             }
         }
