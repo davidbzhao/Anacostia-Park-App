@@ -28,12 +28,12 @@ public class MusicService extends Service {
     @Override
     public void onCreate() {
         mp = new MediaPlayer();
-        Log.e("onCreate-","onCreate");
+        Log.e("mylogs","onCreate");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("onStartCommand-", "onStartCommand ------------------------------ " + intent.getAction());
+        Log.e("mylogs", "onStartCommand ------------------------------ " + intent.getAction());
         if(intent.getAction() != null){
             if(intent.getAction().equals(ACTION_PLAY)){
                 setSong(MusicService.this, R.raw.empirestateofmind);
@@ -45,7 +45,7 @@ public class MusicService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.e("onDestroy-", "onDestroy");
+        Log.e("mylogs", "onDestroy");
         stopSelf();
 //        mp.release();
     }

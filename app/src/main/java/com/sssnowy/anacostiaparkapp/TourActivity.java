@@ -95,6 +95,8 @@ public class TourActivity extends AppCompatActivity {
             }
         };
 
+
+
         /*
         note: dropdown for zone?
 
@@ -122,32 +124,33 @@ public class TourActivity extends AppCompatActivity {
             populate linear layout
         */
 
+        //--------------------------------------------------------------------------------------------------------Listeners
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
-            //----------------------------------------------------------------------------------------------------If location changes,
+            //If location changes,
             @Override
             public void onLocationChanged(Location location) {
                 Button triggerButton = (Button)findViewById(R.id.triggerButton);
                 triggerButton.setText(location.getLatitude() + "," + location.getLongitude());
                 Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
                 int zone = getZone(location.getLatitude(), location.getLongitude());
-                //--------------------------------------------------------------------------------------------------------If enters new zone,
+                //If enters new zone,
                 if(currentZone != zone){
-                    //--------------------------------------------------------------------------------------------------------If audio is not playing,
+                    //If audio is not playing,
                     if(!musicService.isPlaying()) {
-                        //--------------------------------------------------------------------------------------------------------populate transcript map
+                        //populate transcript map
                         transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
-                        //--------------------------------------------------------------------------------------------------------populate linear layout
+                        //populate linear layout
                         populateLinearLayoutTranscript();
-                        //--------------------------------------------------------------------------------------------------------play new zone audio
+                        //play new zone audio
                         musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
                         musicService.playAudio();
 //                        playAudio(getResidFromZone(zone));
                         playButton.setBackgroundResource(R.drawable.pause);
-                        //--------------------------------------------------------------------------------------------------------postdelayed highlight function
+                        //postdelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
                     }
-                    //--------------------------------------------------------------------------------------------------------currentZone = zone
+                    //currentZone = zone
                     currentZone = zone;
                 }
             }
@@ -175,7 +178,6 @@ public class TourActivity extends AppCompatActivity {
 
 
         //----------------------------------------------------------------------------------------------------If play button is clicked,
-        //listeners
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -206,6 +208,7 @@ public class TourActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        //--------------------------------------------------------------------------------------------------------Music Service Connection
         Intent msIntent = new Intent(getApplicationContext(), MusicService.class);
         serviceConnection = new ServiceConnection() {
             @Override
@@ -214,7 +217,8 @@ public class TourActivity extends AppCompatActivity {
                 MusicService.LocalBinder localBinder = (MusicService.LocalBinder)service;
                 musicService = localBinder.getServiceInstance();
                 serviceBound = true;
-                Log.e("","Service Connected");
+                audioHandler.post(audioRunnable);
+                Log.e("mylogs","Service Connected");
             }
 
             @Override
@@ -222,7 +226,7 @@ public class TourActivity extends AppCompatActivity {
                 Toast.makeText(TourActivity.this, "Service disconnected", Toast.LENGTH_SHORT).show();
                 musicService = null;
                 serviceBound = false;
-                Log.e("", "Service Disconnected");
+                Log.e("mylogs", "Service Disconnected");
             }
         };
         bindService(msIntent, serviceConnection, BIND_AUTO_CREATE);
