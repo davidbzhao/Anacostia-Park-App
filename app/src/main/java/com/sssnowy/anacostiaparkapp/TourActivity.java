@@ -73,7 +73,7 @@ public class TourActivity extends AppCompatActivity {
             }
         });
 
-        Log.e("mylogs", "-onCreate");
+//        Log.e("mylogs", "-onCreate");
         //initialize
         playButton = (ImageButton) findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
@@ -88,9 +88,9 @@ public class TourActivity extends AppCompatActivity {
             }
         };
 
-        if(savedInstanceState != null){
-            Log.e("mylogs", "savedInstanceState NOT NULL");
-        }
+//        if(savedInstanceState != null){
+//            Log.e("mylogs", "savedInstanceState NOT NULL");
+//        }
         //--------------------------------------------------------------------------------------------------------Listeners
         /*
         note: dropdown for zone?
@@ -193,6 +193,8 @@ public class TourActivity extends AppCompatActivity {
                 }
             }
         });
+
+
     }
 
     @Override
@@ -205,68 +207,36 @@ public class TourActivity extends AppCompatActivity {
         Log.e("mylogs", "---onStart");
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-//        audioHandler.removeCallbacks(audioRunnable);
-//        if (serviceBound) {
-//            unbindService(serviceConnection);
-//            serviceBound = false;
-//        }
-        Log.e("mylogs", "---onStop");
-    }
+//    @Override
+//    protected void onStop() {
+//        super.onStop();
+//        Log.e("mylogs", "---onStop");
+//    }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("currentZone", currentZone);
-        Log.e("mylogs","-----onSaveInstanceState");
-        super.onSaveInstanceState(outState);
-        //IF RESTORING THE TRANSCRIPT IS TOO SLOW
-//        outState.putIntArray("transcriptKeys", convertIntegerArrayToPrimitive(transcript.keySet().toArray(new Integer[transcript.keySet().size()])));
-//        outState.putStringArray("transcriptValues", transcript.values().toArray(new String[transcript.values().size()]));
-//        private boolean serviceBound = false;
-//        private Handler audioHandler;
-//        private ImageButton playButton;
-//    >    private int currentZone = -1;
-//        private LinearLayout linearLayoutTranscript;
-//        private MusicService musicService;
-//        private Runnable audioRunnable;
-//        private ServiceConnection serviceConnection;
-//    >    private TreeMap<Integer, String> transcript;
-    }
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        outState.putInt("currentZone", currentZone);
+//        Log.e("mylogs","-----onSaveInstanceState");
+//        super.onSaveInstanceState(outState);
+//    }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        Log.e("mylogs-----", "onRestoreInstanceState");
-        currentZone = savedInstanceState.getInt("currentZone");
-        transcript = getTranscriptFromTextFile(getFilenameFromZone(currentZone));
-        populateLinearLayoutTranscript();
-        if (musicService.isPlaying()) {
-            audioHandler.postDelayed(audioRunnable, 1000);
-            playButton.setBackgroundResource(R.drawable.pause);
-        } else {
-            playButton.setBackgroundResource(R.drawable.play);
-        }
-    }
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        Log.e("mylogs", "---Pause");
+//    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.e("mylogs", "---Pause");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.e("mylogs", "onDestroy");
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.e("mylogs", "-onRestart");
-    }
+//    @Override
+//    protected void onDestroy() {
+//        super.onDestroy();
+//        Log.e("mylogs", "onDestroy");
+//    }
+//
+//    @Override
+//    protected void onRestart() {
+//        super.onRestart();
+//        Log.e("mylogs", "-onRestart");
+//    }
 
     public int[] convertIntegerArrayToPrimitive(Integer[] classArray){
         int[] primitiveArray = new int[classArray.length];
