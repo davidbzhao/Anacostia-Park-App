@@ -28,7 +28,7 @@ public class MusicService extends Service {
     @Override
     public void onCreate() {
         mp = new MediaPlayer();
-        Log.e("mylogs","onCreate");
+        Log.e("mylogs","Music Service: onCreate");
     }
 
     @Override
@@ -45,8 +45,8 @@ public class MusicService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.e("mylogs", "onDestroy");
-        stopSelf();
+        Log.e("mylogs", "Music Service: onDestroy");
+        //stopSelf();
 //        mp.release();
     }
 
