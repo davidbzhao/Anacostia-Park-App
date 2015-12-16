@@ -45,7 +45,7 @@ public class MusicService extends Service {
 
     @Override
     public void onDestroy() {
-        Log.e("mylogs", "Music Service: onDestroy");
+        Log.e("mylogs", "Music Service: override onDestroy");
         //stopSelf();
 //        mp.release();
     }

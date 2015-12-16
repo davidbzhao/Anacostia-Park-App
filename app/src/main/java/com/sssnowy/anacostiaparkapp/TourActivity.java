@@ -20,6 +20,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -44,6 +45,8 @@ public class TourActivity extends AppCompatActivity {
     private Runnable audioRunnable;
     private ServiceConnection serviceConnection;
     private TreeMap<Integer, String> transcript;
+    private ScrollView scrollViewTranscript;
+    private boolean scrolling, scrollingPause;
 
     double[][][] polygons = {
             {{38.819745, -77.170083},
@@ -60,6 +63,11 @@ public class TourActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(savedInstanceState != null){
+            Log.e("mylogs","HOIGRWSHPORIHGPOI1");
+        }
+
         setContentView(R.layout.activity_tour);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -73,10 +81,13 @@ public class TourActivity extends AppCompatActivity {
             }
         });
 
-//        Log.e("mylogs", "-onCreate");
+        Log.e("mylogs", "-onCreate");
         //initialize
         playButton = (ImageButton) findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
+        scrollViewTranscript = (ScrollView) findViewById(R.id.scrollViewTranscript);
+        scrolling = false;
+        scrollingPause = false;
         audioHandler = new Handler();
         audioRunnable = new Runnable() {
             @Override
@@ -194,7 +205,29 @@ public class TourActivity extends AppCompatActivity {
             }
         });
 
-
+        scrollViewTranscript.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if(event.getAction() == MotionEvent.ACTION_UP){
+                    Log.e("mylogs", "ACTION_UP");
+                    scrollingPause = true;
+                    scrolling = false;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(scrollingPause){
+                                scrollingPause = false;
+                            }
+                        }
+                    }, 1000);
+                } else if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    Log.e("mylogs", "ACTION_DOWN");
+                    scrolling = true;
+                    scrollingPause = false;
+                }
+                return false;
+            }
+        });
     }
 
     @Override
@@ -207,36 +240,44 @@ public class TourActivity extends AppCompatActivity {
         Log.e("mylogs", "---onStart");
     }
 
-//    @Override
-//    protected void onStop() {
-//        super.onStop();
-//        Log.e("mylogs", "---onStop");
-//    }
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.e("mylogs", "---onStop");
+    }
 
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        outState.putInt("currentZone", currentZone);
-//        Log.e("mylogs","-----onSaveInstanceState");
-//        super.onSaveInstanceState(outState);
-//    }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt("currentZone", currentZone);
+        Log.e("mylogs","-----onSaveInstanceState");
+        super.onSaveInstanceState(outState);
+    }
 
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        Log.e("mylogs", "---Pause");
-//    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.e("mylogs", "---Pause");
+    }
 
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        Log.e("mylogs", "onDestroy");
-//    }
-//
-//    @Override
-//    protected void onRestart() {
-//        super.onRestart();
-//        Log.e("mylogs", "-onRestart");
-//    }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e("mylogs", "onDestroy");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.e("mylogs", "-onRestart");
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.e("mylogs","BACK BUTTON PRESSED");
+        Intent intent = new Intent(TourActivity.this, MenuActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+    }
 
     public int[] convertIntegerArrayToPrimitive(Integer[] classArray){
         int[] primitiveArray = new int[classArray.length];
@@ -362,7 +403,9 @@ public class TourActivity extends AppCompatActivity {
         new Handler().post(new Runnable() {
             @Override
             public void run() {
-                ((ScrollView) findViewById(R.id.scrollViewTranscript)).scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView) findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
+                if(!scrolling && !scrollingPause){
+                    scrollViewTranscript.scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView) findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
+                }
             }
         });
     }
