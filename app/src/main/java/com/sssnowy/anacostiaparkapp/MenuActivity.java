@@ -1,5 +1,6 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,29 +13,30 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.ImageButton;
 
 import java.io.File;
 import java.io.FileOutputStream;
 
-public class MenuActivity extends AppCompatActivity {
+public class MenuActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_menu);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
-        Button tourButton = (Button)findViewById(R.id.button1);
+        ImageButton tourButton = (ImageButton)findViewById(R.id.button1);
         tourButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,24 +67,5 @@ public class MenuActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    @Override
-    public void onWindowFocusChanged(boolean hasFocus) {
-        super.onWindowFocusChanged(hasFocus);
-        if(hasFocus) {
-            Button b1 = (Button)findViewById(R.id.button1);
-            Button b2 = (Button)findViewById(R.id.button2);
-            Button b3 = (Button)findViewById(R.id.button3);
-            Button b4 = (Button)findViewById(R.id.button4);
-            Button b5 = (Button)findViewById(R.id.button5);
-            Button b6 = (Button)findViewById(R.id.button6);
-            b1.setHeight(b1.getWidth());
-            b2.setHeight(b2.getWidth());
-            b3.setHeight(b3.getWidth());
-            b4.setHeight(b4.getWidth());
-            b5.setHeight(b5.getWidth());
-            b6.setHeight(b6.getWidth());
-        }
     }
 }

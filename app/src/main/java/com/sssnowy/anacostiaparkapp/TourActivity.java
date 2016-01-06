@@ -1,5 +1,6 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -35,7 +36,7 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.TreeMap;
 
-public class TourActivity extends AppCompatActivity {
+public class TourActivity extends Activity {
     private boolean serviceBound = false;
     private Handler audioHandler;
     private ImageButton playButton;
@@ -69,17 +70,17 @@ public class TourActivity extends AppCompatActivity {
         }
 
         setContentView(R.layout.activity_tour);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+//        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "~( .. )~", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
+//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "~( .. )~", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//            }
+//        });
 
         Log.e("mylogs", "-onCreate");
         //initialize
@@ -376,7 +377,7 @@ public class TourActivity extends AppCompatActivity {
         for (int cnt = 0; cnt < transcriptArray.length; cnt++) {
             TextView textView = new TextView(this);
             textView.setText(transcriptArray[cnt]);
-            textView.setTextColor(Color.parseColor("#66FFFFFF"));
+            textView.setTextColor(Color.parseColor("#60000000"));
             textView.setTextSize(18);
             textView.setGravity(Gravity.CENTER_HORIZONTAL);
             textView.setPadding(5, 5, 5, 5);
@@ -388,17 +389,19 @@ public class TourActivity extends AppCompatActivity {
     public void highlightTranscript() {
         final int indexOfChild = getIndexFromAudioProgress();
         if (indexOfChild != 0) {
-            linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(ContextCompat.getColor(this, R.color.aws_colorDark));
+//            linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(ContextCompat.getColor(this, R.color.colorAccent));
+            linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(Color.parseColor("#00000000"));
             linearLayoutTranscript.getChildAt(indexOfChild - 1).setPadding(0, 5, 0, 5);
-            ((TextView) linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.parseColor("#66FFFFFF"));
+            ((TextView) linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.parseColor("#60000000"));
             ((TextView) linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextSize(18);
             ((TextView) linearLayoutTranscript.getChildAt(indexOfChild - 1)).setGravity(Gravity.CENTER_HORIZONTAL);
         }
-        linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundResource(R.drawable.rounded_corner);
+//        linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundResource(R.drawable.rounded_corner);
         //linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundColor(Color.parseColor("#666666"));
         //linearLayoutTranscript.getChildAt(indexOfChild).setPadding(0, 10, 0, 10);
-        ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.parseColor("#FFFFFF"));
-        ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextSize(20);
+//        ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.parseColor("#FF000000"));
+        ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
+//        ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextSize(20);
         ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setGravity(Gravity.CENTER);
         new Handler().post(new Runnable() {
             @Override
