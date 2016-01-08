@@ -36,13 +36,15 @@
                 android:text="Tour"
                 android:id="@+id/button1"
                 android:src="@drawable/abc_ic_voice_search_api_mtrl_alpha"
-                style="@style/MenuButton" />
+                style="@style/MenuButton"
+                android:background="@drawable/menu_button" />
 
             <ImageButton
                 android:text="Map"
                 android:id="@+id/button2"
                 android:src="@drawable/abc_ic_menu_paste_mtrl_am_alpha"
-                style="@style/MenuButton" />
+                style="@style/MenuButton"
+                android:background="@drawable/menu_button" />
         </LinearLayout>
 
         <LinearLayout
@@ -56,13 +58,15 @@
                 android:text="B3"
                 android:id="@+id/button3"
                 android:src="@drawable/abc_ic_menu_selectall_mtrl_alpha"
-                style="@style/MenuButton" />
+                style="@style/MenuButton"
+                android:background="@drawable/menu_button" />
 
             <ImageButton
                 android:text="B4"
                 android:id="@+id/button4"
                 android:src="@drawable/abc_ic_menu_copy_mtrl_am_alpha"
-                style="@style/MenuButton" />
+                style="@style/MenuButton"
+                android:background="@drawable/menu_button" />
         </LinearLayout>
 
         <LinearLayout
@@ -76,13 +80,15 @@
                 android:text="B5"
                 android:id="@+id/button5"
                 android:src="@drawable/abc_ic_search_api_mtrl_alpha"
-                style="@style/MenuButton" />
+                style="@style/MenuButton"
+                android:background="@drawable/menu_button" />
 
             <ImageButton
                 android:text="B6"
                 android:id="@+id/button6"
                 android:src="@drawable/abc_ic_menu_share_mtrl_alpha"
-                style="@style/MenuButton" />
+                style="@style/MenuButton"
+                android:background="@drawable/menu_button" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

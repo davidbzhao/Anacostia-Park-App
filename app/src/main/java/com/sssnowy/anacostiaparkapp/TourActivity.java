@@ -50,15 +50,15 @@ public class TourActivity extends Activity {
     private boolean scrolling, scrollingPause;
 
     double[][][] polygons = {
-            {{38.819745, -77.170083},
-                    {38.819711, -77.168661},
-                    {38.819189, -77.166832},
-                    {38.816568, -77.168307},
-                    {38.817754, -77.170129}},
-            {{38.820163, -77.169949},
-                    {38.819164, -77.166381},
-                    {38.822182, -77.165636},
-                    {38.822169, -77.169965}}
+            {{39.819745, -77.170083},
+                    {39.819711, -77.168661},
+                    {39.819189, -77.166832},
+                    {39.816568, -77.168307},
+                    {39.817754, -77.170129}},
+            {{39.820163, -77.169949},
+                    {39.819164, -77.166391},
+                    {39.822182, -77.165636},
+                    {39.822169, -77.169965}}
     };
 
     @Override
@@ -94,8 +94,10 @@ public class TourActivity extends Activity {
             @Override
             public void run() {
                 if (musicService.isPlaying()) {
-                    highlightTranscript();
-                    audioHandler.postDelayed(this, 100);
+                    if(linearLayoutTranscript.getChildCount() > 0) {
+                        highlightTranscript();
+                        audioHandler.postDelayed(this, 100);
+                    }
                 }
             }
         };
@@ -289,7 +291,7 @@ public class TourActivity extends Activity {
     }
 
     public int getZone(double latitude, double longitude) {
-        //TJ 38.8184974,-77.168681
+        //TJ 39.8184974,-77.168681
         for (int cnt = 0; cnt < polygons.length; cnt++) {
             int intersections = numberOfLinesCrossed(polygons[cnt], latitude, longitude);
             Toast.makeText(TourActivity.this, intersections + "", Toast.LENGTH_SHORT).show();
