@@ -87,8 +87,6 @@ public class TourActivity extends Activity {
         playButton = (ImageButton) findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
         scrollViewTranscript = (ScrollView) findViewById(R.id.scrollViewTranscript);
-        scrolling = false;
-        scrollingPause = false;
         audioHandler = new Handler();
         audioRunnable = new Runnable() {
             @Override
