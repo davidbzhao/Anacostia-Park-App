@@ -47,7 +47,7 @@ public class TourActivity extends Activity {
     private ServiceConnection serviceConnection;
     private TreeMap<Integer, String> transcript;
     private ScrollView scrollViewTranscript;
-    private boolean scrolling, scrollingPause;
+    private int scrollingInt = 0;
 
     double[][][] polygons = {
             {{38.819745, -77.170083},
@@ -213,23 +213,22 @@ public class TourActivity extends Activity {
         scrollViewTranscript.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.e("UserAction","Scroll View Touched");
                 if(event.getAction() == MotionEvent.ACTION_UP){
+                    Log.e("UserAction","Scroll View Touched ACTION_UP");
                     Log.e("mylogs", "ACTION_UP");
-                    scrollingPause = true;
-                    scrolling = false;
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if(scrollingPause){
-                                scrollingPause = false;
+                            scrollingInt -= 1;
+                            if(scrollingInt < 0){
+                                Log.e("mylogs","WOAHWOAHWOAH!!!! That ain't right");
                             }
                         }
                     }, 1000);
                 } else if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    Log.e("UserAction","Scroll View Touched ACTION_DOWN");
                     Log.e("mylogs", "ACTION_DOWN");
-                    scrolling = true;
-                    scrollingPause = false;
+                    scrollingInt += 1;
                 }
                 return false;
             }
@@ -255,7 +254,7 @@ public class TourActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("currentZone", currentZone);
-        Log.e("mylogs","-----onSaveInstanceState");
+        Log.e("mylogs", "-----onSaveInstanceState");
         super.onSaveInstanceState(outState);
     }
 
@@ -306,10 +305,6 @@ public class TourActivity extends Activity {
     }
 
     public int getResidFromZone(int zone) {
-        Button triggerButton = (Button) findViewById(R.id.triggerButton);
-        triggerButton.setText(triggerButton.getText() + " " + zone);
-        Log.e("mylogs", "Zone 0" + R.raw.greyarea);
-        Log.e("mylogs","Zone Else" + R.raw.paradise);
         if (zone == 0) {
             return R.raw.greyarea;
         } else if (zone == 1) {
@@ -413,7 +408,7 @@ public class TourActivity extends Activity {
         new Handler().post(new Runnable() {
             @Override
             public void run() {
-                if(!scrolling && !scrollingPause){
+                if(scrollingInt <= 0){
                     scrollViewTranscript.scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView) findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
                 }
             }
