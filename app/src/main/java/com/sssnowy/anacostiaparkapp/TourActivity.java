@@ -138,28 +138,29 @@ public class TourActivity extends Activity {
             //If location changes,
             @Override
             public void onLocationChanged(Location location) {
-                Button triggerButton = (Button) findViewById(R.id.triggerButton);
-                triggerButton.setText(location.getLatitude() + "," + location.getLongitude());
+                Log.e("UserAction","Location Changed");
                 Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
                 int zone = getZone(location.getLatitude(), location.getLongitude());
                 //If enters new zone,
                 if (currentZone != zone) {
                     //If audio is not playing,
-                    if (!musicService.isPlaying()) {
-                        //populate transcript map
-                        transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
-                        //populate linear layout
-                        populateLinearLayoutTranscript();
-                        //play new zone audio
-                        musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
-                        musicService.playAudio();
+                    if(serviceBound) {
+                        if (!musicService.isPlaying()) {
+                            //populate transcript map
+                            transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
+                            //populate linear layout
+                            populateLinearLayoutTranscript();
+                            //play new zone audio
+                            musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+                            musicService.playAudio(getApplicationContext(), getResidFromZone(zone));
 //                        playAudio(getResidFromZone(zone));
-                        playButton.setBackgroundResource(R.drawable.pause);
-                        //postdelayed highlight function
-                        audioHandler.postDelayed(audioRunnable, 1000);
+                            playButton.setBackgroundResource(R.drawable.pause);
+                            //postdelayed highlight function
+                            audioHandler.postDelayed(audioRunnable, 1000);
+                        }
+                        //currentZone = zone
+                        currentZone = zone;
                     }
-                    //currentZone = zone
-                    currentZone = zone;
                 }
             }
 
@@ -189,12 +190,13 @@ public class TourActivity extends Activity {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Log.e("UserAction","Play Button Clicked");
                 //If audio is not playing,
                 if (!musicService.isPlaying()) {
                     //If transcript filled,
                     if (linearLayoutTranscript.getChildCount() > 0) {
                         //play audio
-                        musicService.playAudio();
+                        musicService.playAudio(getApplicationContext(), getResidFromZone(currentZone));
                         playButton.setBackgroundResource(R.drawable.pause);
                         //postDelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
@@ -211,6 +213,7 @@ public class TourActivity extends Activity {
         scrollViewTranscript.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                Log.e("UserAction","Scroll View Touched");
                 if(event.getAction() == MotionEvent.ACTION_UP){
                     Log.e("mylogs", "ACTION_UP");
                     scrollingPause = true;
@@ -305,6 +308,8 @@ public class TourActivity extends Activity {
     public int getResidFromZone(int zone) {
         Button triggerButton = (Button) findViewById(R.id.triggerButton);
         triggerButton.setText(triggerButton.getText() + " " + zone);
+        Log.e("mylogs", "Zone 0" + R.raw.greyarea);
+        Log.e("mylogs","Zone Else" + R.raw.paradise);
         if (zone == 0) {
             return R.raw.greyarea;
         } else if (zone == 1) {
