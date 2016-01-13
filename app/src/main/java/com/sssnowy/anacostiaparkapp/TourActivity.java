@@ -97,6 +97,8 @@ public class TourActivity extends Activity {
             }
         };
 
+
+        setPlayButtonToPlay();
 //        if(savedInstanceState != null){
 //            Log.e("mylogs", "savedInstanceState NOT NULL");
 //        }
@@ -149,7 +151,8 @@ public class TourActivity extends Activity {
                             musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
                             musicService.playAudio(getApplicationContext(), getResidFromZone(zone));
 //                        playAudio(getResidFromZone(zone));
-                            playButton.setBackgroundResource(R.drawable.pause);
+                            setPlayButtonToPause();
+                            //playButton.setBackgroundResource(R.drawable.pause);
                             //postdelayed highlight function
                             audioHandler.postDelayed(audioRunnable, 1000);
                         }
@@ -192,7 +195,8 @@ public class TourActivity extends Activity {
                     if (linearLayoutTranscript.getChildCount() > 0) {
                         //play audio
                         musicService.playAudio(getApplicationContext(), getResidFromZone(currentZone));
-                        playButton.setBackgroundResource(R.drawable.pause);
+                        setPlayButtonToPause();
+//                        playButton.setBackgroundResource(R.drawable.pause);
                         //postDelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
                     }
@@ -200,7 +204,8 @@ public class TourActivity extends Activity {
                 } else {
                     //pause audio
                     musicService.pauseAudio();
-                    playButton.setBackgroundResource(R.drawable.play);
+                    setPlayButtonToPlay();
+//                    playButton.setBackgroundResource(R.drawable.play);
                 }
             }
         });
@@ -440,5 +445,21 @@ public class TourActivity extends Activity {
                 Log.e("mylogs", "------Service Disconnected");
             }
         });
+    }
+
+    public void setPlayButtonToPlay(){
+        if(Build.VERSION.SDK_INT < 21){
+            playButton.setBackgroundResource(R.drawable.play_colored);
+        } else {
+            playButton.setBackgroundResource(R.drawable.play);
+        }
+    }
+
+    public void setPlayButtonToPause(){
+        if(Build.VERSION.SDK_INT < 21){
+            playButton.setBackgroundResource(R.drawable.pause_colored);
+        } else {
+            playButton.setBackgroundResource(R.drawable.pause);
+        }
     }
 }
