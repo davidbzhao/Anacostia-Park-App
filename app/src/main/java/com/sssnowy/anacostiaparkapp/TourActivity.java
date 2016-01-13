@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -64,11 +65,6 @@ public class TourActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if(savedInstanceState != null){
-            Log.e("mylogs","HOIGRWSHPORIHGPOI1");
-        }
-
         setContentView(R.layout.activity_tour);
 //        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 //        setSupportActionBar(toolbar);
@@ -81,6 +77,7 @@ public class TourActivity extends Activity {
 //                        .setAction("Action", null).show();
 //            }
 //        });
+        Log.e("mylogs", "BUILD VERSION: " + Build.VERSION.SDK_INT);
 
         Log.e("mylogs", "-onCreate");
         //initialize
