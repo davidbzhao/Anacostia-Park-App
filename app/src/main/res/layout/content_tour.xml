@@ -19,7 +19,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:scaleType="fitXY"
-        android:backgroundTint="@color/colorPrimary" />
+        android:backgroundTint="@color/colorPrimary"/>
 
     <ScrollView
         android:layout_width="match_parent"
@@ -37,8 +37,7 @@
             android:layout_alignParentTop="true"
             android:layout_centerHorizontal="true"
             android:id="@+id/linearLayoutTranscript"
-            android:layout_above="@+id/playButton"
-            android:gravity="center_horizontal"></LinearLayout>
+            android:gravity="center_horizontal" />
     </ScrollView>
 
 </RelativeLayout>
