@@ -371,6 +371,7 @@ public class TourActivity extends Activity {
     }
 
     public void populateLinearLayoutTranscript() {
+        linearLayoutTranscript.removeAllViews();
         String[] transcriptArray = transcript.values().toArray(new String[transcript.size()]);
         for (int cnt = 0; cnt < transcriptArray.length; cnt++) {
             TextView textView = new TextView(this);
