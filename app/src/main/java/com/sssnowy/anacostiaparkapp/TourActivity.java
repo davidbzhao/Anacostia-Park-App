@@ -14,17 +14,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.PersistableBundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -34,10 +28,11 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 public class TourActivity extends Activity {
+    private static final int NUMBER_OF_ZONES = 3;
     private boolean serviceBound = false;
     private Handler audioHandler;
     private ImageButton playButton;
@@ -50,7 +45,7 @@ public class TourActivity extends Activity {
     private ScrollView scrollViewTranscript;
     private int scrollingInt = 0;
 
-    double[][][] polygons = {
+    double[][][] polygons;/* = {
             {{38.819745, -77.170083},
                     {38.819711, -77.168661},
                     {38.819189, -77.166832},
@@ -60,7 +55,7 @@ public class TourActivity extends Activity {
                     {38.819164, -77.166381},
                     {38.822182, -77.165636},
                     {38.822169, -77.169965}}
-    };
+    };*/
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +76,7 @@ public class TourActivity extends Activity {
 
         Log.e("mylogs", "-onCreate");
         //initialize
+        polygons = getPolygons();
         playButton = (ImageButton) findViewById(R.id.playButton);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
         scrollViewTranscript = (ScrollView) findViewById(R.id.scrollViewTranscript);
@@ -318,13 +314,13 @@ public class TourActivity extends Activity {
 
     public String getFilenameFromZone(int zone) {
         if (zone == 0) {
-            return "greyarea.txt";
+            return "transcript_0.txt";
         } else if (zone == 1) {
-            return "empirestateofmind.txt";
+            return "transcript_1.txt";
         } else if (zone == 2) {
-            return "paradise.txt";
+            return "transcript_2.txt";
         } else {
-            return "paradise.txt";
+            return "transcript_2.txt";
         }
     }
 
@@ -461,5 +457,43 @@ public class TourActivity extends Activity {
         } else {
             playButton.setBackgroundResource(R.drawable.pause);
         }
+    }
+
+    public double[][][] getPolygons(){
+        BufferedReader bufferedReader = null;
+        ArrayList<ArrayList<double[]>> temp = new ArrayList<ArrayList<double[]>>();
+        for(int cnt = 0; cnt < NUMBER_OF_ZONES; cnt++){
+            try {
+                temp.add(new ArrayList<double[]>());
+                bufferedReader = new BufferedReader(new InputStreamReader(getAssets().open("zone_" + cnt + ".txt")));
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    String[] splitLine = line.split(",");
+                    double[] coord = {Double.parseDouble(splitLine[0]), Double.parseDouble(splitLine[1])};
+                    temp.get(cnt).add(coord);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (bufferedReader != null) {
+                    try {
+                        bufferedReader.close();
+                    } catch (IOException e) {
+
+                    }
+                }
+            }
+        }
+
+        double[][][] finalPolygons = new double[temp.size()][][];
+        for(int cnt = 0; cnt < temp.size(); cnt++){
+            finalPolygons[cnt] = new double[temp.get(cnt).size()][2];
+            for(int z = 0; z < finalPolygons[cnt].length; z++){
+                finalPolygons[cnt][z][0] = temp.get(cnt).get(z)[0];
+                finalPolygons[cnt][z][1] = temp.get(cnt).get(z)[1];
+            }
+        }
+        
+        return finalPolygons;
     }
 }
