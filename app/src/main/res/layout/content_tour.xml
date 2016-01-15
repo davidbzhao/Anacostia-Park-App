@@ -40,4 +40,13 @@
             android:gravity="center_horizontal" />
     </ScrollView>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/enableGPSTextView"
+        android:text="Enable GPS to Activate Audio Tour"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorAccent"/>
+
 </RelativeLayout>

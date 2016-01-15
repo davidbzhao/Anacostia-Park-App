@@ -14,11 +14,13 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -34,6 +36,7 @@ import java.util.TreeMap;
 public class TourActivity extends Activity {
     private static final int NUMBER_OF_ZONES = 3;
     private boolean serviceBound = false;
+    private TextView enableGPSTextView;
     private Handler audioHandler;
     private ImageButton playButton;
     private int currentZone = -1;
@@ -78,6 +81,7 @@ public class TourActivity extends Activity {
         //initialize
         polygons = getPolygons();
         playButton = (ImageButton) findViewById(R.id.playButton);
+        enableGPSTextView = (TextView) findViewById(R.id.enableGPSTextView);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
         scrollViewTranscript = (ScrollView) findViewById(R.id.scrollViewTranscript);
         audioHandler = new Handler();
@@ -164,11 +168,13 @@ public class TourActivity extends Activity {
 
             @Override
             public void onProviderEnabled(String provider) {
+                enableGPSTextView.setVisibility(View.INVISIBLE);
                 Toast.makeText(TourActivity.this, "on", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onProviderDisabled(String provider) {
+                enableGPSTextView.setVisibility(View.VISIBLE);
                 Toast.makeText(TourActivity.this, "off", Toast.LENGTH_SHORT).show();
             }
         };
@@ -209,20 +215,20 @@ public class TourActivity extends Activity {
         scrollViewTranscript.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if(event.getAction() == MotionEvent.ACTION_UP){
-                    Log.e("UserAction","Scroll View Touched ACTION_UP");
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    Log.e("UserAction", "Scroll View Touched ACTION_UP");
                     Log.e("mylogs", "ACTION_UP");
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             scrollingInt -= 1;
-                            if(scrollingInt < 0){
-                                Log.e("mylogs","WOAHWOAHWOAH!!!! That ain't right");
+                            if (scrollingInt < 0) {
+                                Log.e("mylogs", "WOAHWOAHWOAH!!!! That ain't right");
                             }
                         }
                     }, 1000);
-                } else if(event.getAction() == MotionEvent.ACTION_DOWN){
-                    Log.e("UserAction","Scroll View Touched ACTION_DOWN");
+                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    Log.e("UserAction", "Scroll View Touched ACTION_DOWN");
                     Log.e("mylogs", "ACTION_DOWN");
                     scrollingInt += 1;
                 }
@@ -494,7 +500,7 @@ public class TourActivity extends Activity {
                 finalPolygons[cnt][z][1] = temp.get(cnt).get(z)[1];
             }
         }
-        
+
         return finalPolygons;
     }
 }
