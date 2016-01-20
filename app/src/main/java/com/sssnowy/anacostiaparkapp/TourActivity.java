@@ -93,6 +93,8 @@ public class TourActivity extends Activity {
                         highlightTranscript();
                         audioHandler.postDelayed(this, 100);
                     }
+                } else {
+                    setPlayButtonToPlay();
                 }
             }
         };
@@ -138,26 +140,28 @@ public class TourActivity extends Activity {
                 Log.e("UserAction","Location Changed");
                 Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
                 int zone = getZone(location.getLatitude(), location.getLongitude());
-                //If enters new zone,
-                if (currentZone != zone) {
-                    //If audio is not playing,
-                    if(serviceBound) {
-                        if (!musicService.isPlaying()) {
-                            //populate transcript map
-                            transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
-                            //populate linear layout
-                            populateLinearLayoutTranscript();
-                            //play new zone audio
-                            musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
-                            musicService.playAudio(getApplicationContext(), getResidFromZone(zone));
+                if(!musicService.isPlaying()) {
+                    //If enters new zone,
+                    if (currentZone != zone) {
+                        //If audio is not playing,
+                        if (serviceBound) {
+                            if (!musicService.isPlaying()) {
+                                //populate transcript map
+                                transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
+                                //populate linear layout
+                                populateLinearLayoutTranscript();
+                                //play new zone audio
+                                musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+                                musicService.playAudio();
 //                        playAudio(getResidFromZone(zone));
-                            setPlayButtonToPause();
-                            //playButton.setBackgroundResource(R.drawable.pause);
-                            //postdelayed highlight function
-                            audioHandler.postDelayed(audioRunnable, 1000);
+                                setPlayButtonToPause();
+                                //playButton.setBackgroundResource(R.drawable.pause);
+                                //postdelayed highlight function
+                                audioHandler.postDelayed(audioRunnable, 1000);
+                            }
+                            //currentZone = zone
+                            currentZone = zone;
                         }
-                        //currentZone = zone
-                        currentZone = zone;
                     }
                 }
             }
@@ -169,13 +173,16 @@ public class TourActivity extends Activity {
             @Override
             public void onProviderEnabled(String provider) {
                 enableGPSTextView.setVisibility(View.INVISIBLE);
+                playIntro();
                 Toast.makeText(TourActivity.this, "on", Toast.LENGTH_SHORT).show();
+                Log.e("mylogs","GPS Turned ON");
             }
 
             @Override
             public void onProviderDisabled(String provider) {
                 enableGPSTextView.setVisibility(View.VISIBLE);
                 Toast.makeText(TourActivity.this, "off", Toast.LENGTH_SHORT).show();
+                Log.e("mylogs", "GPS Turned OFF");
             }
         };
 
@@ -196,11 +203,12 @@ public class TourActivity extends Activity {
                     //If transcript filled,
                     if (linearLayoutTranscript.getChildCount() > 0) {
                         //play audio
-                        musicService.playAudio(getApplicationContext(), getResidFromZone(currentZone));
+                        musicService.playAudio();
                         setPlayButtonToPause();
 //                        playButton.setBackgroundResource(R.drawable.pause);
                         //postDelayed highlight function
                         audioHandler.postDelayed(audioRunnable, 1000);
+                        ((TextView)linearLayoutTranscript.getChildAt(linearLayoutTranscript.getChildCount() - 1)).setTextColor(Color.parseColor("#60000000"));
                     }
                     //If audio is playing,
                 } else {
@@ -269,6 +277,7 @@ public class TourActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        musicService.stopSelf();
         Log.e("mylogs", "onDestroy");
     }
 
@@ -437,6 +446,7 @@ public class TourActivity extends Activity {
                 musicService = localBinder.getServiceInstance();
                 serviceBound = true;
                 audioHandler.post(audioRunnable);
+                playIntro();
                 Log.e("mylogs", "------Service Connected");
             }
 
@@ -502,5 +512,29 @@ public class TourActivity extends Activity {
         }
 
         return finalPolygons;
+    }
+
+    public boolean isGPSOn(){
+        final LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    public void playIntro(){
+        //if not already heard
+        if(isGPSOn()) {
+            enableGPSTextView.setVisibility(View.INVISIBLE);
+            if (serviceBound) {
+                if (musicService.isPlaying()) {
+                    Log.e("mylogs", "something be wrong");
+                } else {
+                    transcript = getTranscriptFromTextFile("transcript_intro.txt");
+                    populateLinearLayoutTranscript();
+                    musicService.setAudio(getApplicationContext(), R.raw.wegoon);
+                    musicService.playAudio();
+                    setPlayButtonToPause();
+                    audioHandler.postDelayed(audioRunnable, 1000);
+                }
+            }
+        }
     }
 }

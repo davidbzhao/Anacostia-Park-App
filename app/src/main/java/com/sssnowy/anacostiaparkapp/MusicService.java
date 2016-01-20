@@ -16,6 +16,7 @@ import android.widget.Toast;
  */
 public class MusicService extends Service {
     private MediaPlayer mp;
+    private int curResid;
     public static final String ACTION_PLAY = "com.sssnowy.anacostiaparkapp.action.ACTION_PLAY";
     private IBinder binder = new LocalBinder();
 
@@ -36,7 +37,7 @@ public class MusicService extends Service {
         Log.e("mylogs", "onStartCommand ------------------------------ " + intent.getAction());
         if(intent.getAction() != null){
             if(intent.getAction().equals(ACTION_PLAY)){
-                setSong(MusicService.this, R.raw.empirestateofmind);
+                setAudio(MusicService.this, R.raw.empirestateofmind);
             }
         }
         return START_STICKY;
@@ -49,17 +50,13 @@ public class MusicService extends Service {
 //        mp.release();
     }
 
-    public void setSong(Context c, int resid){
-        mp.reset();
-        mp = MediaPlayer.create(c, resid);
-    }
-
     public void setAudio(Context c, int resid){
+        curResid = resid;
         mp.reset();
         mp = MediaPlayer.create(c, resid);
     }
 
-    public void playAudio(Context c, int resid){
+    public void playAudio(){
         mp.start();
     }
 
@@ -69,6 +66,10 @@ public class MusicService extends Service {
 
     public boolean isPlaying(){
         return mp.isPlaying();
+    }
+
+    public int getResid(){
+        return curResid;
     }
 
     public int getCurrentPosition(){
