@@ -35,11 +35,11 @@ public class MusicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e("mylogs", "onStartCommand ------------------------------ " + intent.getAction());
-        if(intent.getAction() != null){
-            if(intent.getAction().equals(ACTION_PLAY)){
-                setAudio(MusicService.this, R.raw.empirestateofmind);
-            }
-        }
+//        if(intent.getAction() != null){
+//            if(intent.getAction().equals(ACTION_PLAY)){
+//                setAudio(MusicService.this, R.raw.empirestateofmind);
+//            }
+//        }
         return START_STICKY;
     }
 
@@ -54,6 +54,12 @@ public class MusicService extends Service {
         curResid = resid;
         mp.reset();
         mp = MediaPlayer.create(c, resid);
+        mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mp.seekTo(0);
+            }
+        });
     }
 
     public void playAudio(){
