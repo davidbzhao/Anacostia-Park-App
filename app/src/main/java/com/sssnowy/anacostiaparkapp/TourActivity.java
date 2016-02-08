@@ -529,7 +529,7 @@ public class TourActivity extends Activity {
         if(isGPSOn()) {
             enableGPSTextView.setVisibility(View.INVISIBLE);
             if (serviceBound) {
-                if (musicService.isPlaying()) {
+               if (musicService.isPlaying()) {
                     Log.e("mylogs", "something be wrong");
                 } else {
                     transcript = getTranscriptFromTextFile("transcript_intro.txt");
