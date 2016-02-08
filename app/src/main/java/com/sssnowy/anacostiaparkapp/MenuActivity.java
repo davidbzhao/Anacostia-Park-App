@@ -47,6 +47,17 @@ public class MenuActivity extends Activity {
                 startActivity(intent);
             }
         });
+
+        ImageButton mapButton = (ImageButton)findViewById(R.id.button2);
+        mapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("UserAction","Map Button Clicked");
+                Intent intent = new Intent(MenuActivity.this, MapActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
