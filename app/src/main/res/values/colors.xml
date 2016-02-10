@@ -5,6 +5,10 @@
     <color name="colorAccent">#FF1744</color>
     <color name="menuButton">#FFFFFF</color>
 
+    <color name="zoneBorder">#90FF1744</color>
+    <color name="zoneFill">#454CAF50</color>
+
+
     <!--<color name="aws_colorPrimary">#6FA542</color>-->
     <!--<color name="aws_colorPrimaryDark">#4E7828</color>-->
     <!--<color name="aws_colorSecondaryLight">#00D4F4</color>-->
