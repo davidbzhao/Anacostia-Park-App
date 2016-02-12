@@ -181,7 +181,7 @@ public class TourActivity extends Activity {
         };
 
         if (checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5, 10, locationListener);
         } else {
             Toast.makeText(TourActivity.this, "turn on your GPS", Toast.LENGTH_SHORT).show();
         }

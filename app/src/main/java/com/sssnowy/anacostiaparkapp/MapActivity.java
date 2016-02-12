@@ -1,6 +1,8 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.app.LauncherActivity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -8,6 +10,7 @@ import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -15,6 +18,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
@@ -83,14 +87,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 .strokeWidth(4f)
                 .fillColor(ContextCompat.getColor(this, R.color.zoneFill)));
 
+
+        final Circle userLocation = mMap.addCircle(new CircleOptions()
+                .center(new LatLng(0, 0))
+                .fillColor(ContextCompat.getColor(MapActivity.this, R.color.colorAccent))
+                .strokeWidth(0.0f)
+                .radius(5.0));
+
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                mMap.addCircle(new CircleOptions()
-                    .center(new LatLng(location.getLatitude(), location.getLongitude()))
-                    .fillColor(ContextCompat.getColor(MapActivity.this, R.color.colorAccent))
-                    .radius(5.0));
+                userLocation.setCenter(new LatLng(location.getLatitude(), location.getLongitude()));
             }
 
             @Override
@@ -108,5 +116,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
             }
         };
+
+        if (checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5, 10, locationListener);
+        } else {
+            Toast.makeText(MapActivity.this, "turn on your GPS", Toast.LENGTH_SHORT).show();
+        }
     }
 }
