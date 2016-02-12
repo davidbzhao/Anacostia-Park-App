@@ -32,6 +32,8 @@ import java.util.TreeMap;
 
 public class TourActivity extends Activity {
     private static final int NUMBER_OF_ZONES = 3;
+    private boolean transcriptTimerTaskScheduled = false;
+    private boolean introPlayed = false;
     private boolean serviceBound = false;
     private TextView enableGPSTextView;
     private Handler audioHandler;
@@ -147,6 +149,7 @@ public class TourActivity extends Activity {
                                 //play new zone audio
                                 musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
                                 musicService.playAudio();
+                                scheduleTranscriptTimerTask();
 //                                  playAudio(getResidFromZone(zone));
                                 setPlayButtonToPause();
                                 //playButton.setBackgroundResource(R.drawable.pause);
@@ -198,6 +201,7 @@ public class TourActivity extends Activity {
                     if (linearLayoutTranscript.getChildCount() > 0) {
                         //play audio
                         musicService.playAudio();
+                        scheduleTranscriptTimerTask();
                         setPlayButtonToPause();
 //                        playButton.setBackgroundResource(R.drawable.pause);
                         //postDelayed highlight function
@@ -252,7 +256,7 @@ public class TourActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
-        Log.e("UserAction","--onStop");
+        Log.e("UserAction", "--onStop");
     }
 
     @Override
@@ -450,7 +454,9 @@ public class TourActivity extends Activity {
                 serviceBound = true;
 //                audioHandler.post(audioRunnable);
 //                transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, 1000);
-                playIntro();
+                if(!introPlayed) {
+                    playIntro();
+                }
                 Log.e("mylogs", "------Service Connected");
             }
 
@@ -531,15 +537,23 @@ public class TourActivity extends Activity {
                if (musicService.isPlaying()) {
                     Log.e("mylogs", "something be wrong");
                 } else {
+                   introPlayed = true;
                     transcript = getTranscriptFromTextFile("transcript_intro.txt");
                     populateLinearLayoutTranscript();
                     musicService.setAudio(getApplicationContext(), R.raw.wegoon);
                     musicService.playAudio();
                     setPlayButtonToPause();
 //                    audioHandler.post(audioRunnable);
-                    transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, 1000);
+                   scheduleTranscriptTimerTask();
                 }
             }
         }
+    }
+
+    public void scheduleTranscriptTimerTask(){
+        if(!transcriptTimerTaskScheduled) {
+            transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, 1000);
+        }
+        transcriptTimerTaskScheduled = true;
     }
 }
