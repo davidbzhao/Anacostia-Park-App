@@ -2,6 +2,9 @@ package com.sssnowy.anacostiaparkapp;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -12,6 +15,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -78,5 +82,31 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 .strokeColor(ContextCompat.getColor(this, R.color.zoneBorder))
                 .strokeWidth(4f)
                 .fillColor(ContextCompat.getColor(this, R.color.zoneFill)));
+
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        LocationListener locationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                mMap.addCircle(new CircleOptions()
+                    .center(new LatLng(location.getLatitude(), location.getLongitude()))
+                    .fillColor(ContextCompat.getColor(MapActivity.this, R.color.colorAccent))
+                    .radius(5.0));
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+
+            }
+        };
     }
 }

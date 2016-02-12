@@ -53,9 +53,9 @@ public class TourActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tour);
-        Log.e("mylogs", "BUILD VERSION: " + Build.VERSION.SDK_INT);
+        Log.e("UserAction", "BUILD VERSION: " + Build.VERSION.SDK_INT);
 
-        Log.e("mylogs", "-onCreate");
+        Log.e("UserAction", "-onCreate");
         //initialize
         polygons = getPolygons();
         playButton = (ImageButton) findViewById(R.id.playButton);
@@ -131,7 +131,6 @@ public class TourActivity extends Activity {
             //If location changes,
             @Override
             public void onLocationChanged(Location location) {
-                Log.e("UserAction","Location Changed");
                 Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
                 int zone = getZone(location.getLatitude(), location.getLongitude());
                 Log.e("mylogs", location.getLatitude() + " " + location.getLongitude());
@@ -247,41 +246,41 @@ public class TourActivity extends Activity {
         Intent msIntent = new Intent(getApplicationContext(), MusicService.class);
         serviceConnection = getServiceConnection();
         bindService(msIntent, serviceConnection, BIND_AUTO_CREATE);
-        Log.e("mylogs", "---onStart");
+        Log.e("UserAction", "---onStart");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.e("mylogs", "---onStop");
+        Log.e("UserAction","--onStop");
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("currentZone", currentZone);
-        Log.e("mylogs", "-----onSaveInstanceState");
+        Log.e("UserAction", "-----onSaveInstanceState");
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("mylogs", "---Pause");
+        Log.e("UserAction", "---Pause");
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+        Log.e("UserAction", "onDestroy");
         if(serviceConnection != null){
             unbindService(serviceConnection);
         }
-        Log.e("mylogs", "onDestroy");
+        super.onDestroy();
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.e("mylogs", "-onRestart");
+        Log.e("UserAction", "-onRestart");
     }
 
     @Override
