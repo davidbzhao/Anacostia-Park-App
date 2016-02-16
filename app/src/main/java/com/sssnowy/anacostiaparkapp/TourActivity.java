@@ -540,7 +540,7 @@ public class TourActivity extends Activity {
                    introPlayed = true;
                     transcript = getTranscriptFromTextFile("transcript_intro.txt");
                     populateLinearLayoutTranscript();
-                    musicService.setAudio(getApplicationContext(), R.raw.wegoon);
+                    musicService.setAudio(getApplicationContext(), R.raw.intro);
                     musicService.playAudio();
                     setPlayButtonToPause();
 //                    audioHandler.post(audioRunnable);
