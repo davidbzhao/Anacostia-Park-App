@@ -1,0 +1,22 @@
+different scenarios
+
+location changed, new zone, not paused, not playing audio, first time playing audio (Your previous zone's audio has finished playing)
+location changed, new zone, not paused, playing audio, first time playing audio (Your previous zone's audio is still playing)
+location changed, new zone, paused, not playing audio, first time playing audio (The user paused the previous zone's audio)
+location changed, new zone, paused, playing audio, first time playing audio (should not happen)
+location changed, new zone, not paused, not playing audio, not first time playing audio (Your previous zone's audio has finished playing for another time)
+location changed, new zone, not paused, playing audio, not first time playing audio (Your previous zone's audio is playing again)
+location changed, new zone, paused, not playing audio, not first time playing audio (The user paused the previous zone's audio on its nth run)
+location changed, new zone, paused, playing audio, not first time playing audio (should not happen)
+
+
+once a user manually clicks pause, automated audio tour is paused
+what if a user accidentally clicks play/pause after nth run
+- so if a user pauses on a nonfirst time, then continue audio tour
+
+Your previous zone's audio has finished playing => change audio
+Your previous zone's audio is still playing => wait to change audio
+The user paused the previous zone's audio => change audio, but don't play
+Your previous zone's audio has finished playing for another time => change audio
+Your previous zone's audio is playing again => wait to change audio
+The user paused the previous zone's audio on its nth run => change audio

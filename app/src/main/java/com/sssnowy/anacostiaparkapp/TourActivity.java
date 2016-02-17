@@ -55,9 +55,9 @@ public class TourActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tour);
-        Log.e("UserAction", "BUILD VERSION: " + Build.VERSION.SDK_INT);
+        Log.e("mylogs", "BUILD VERSION: " + Build.VERSION.SDK_INT);
 
-        Log.e("UserAction", "-onCreate");
+        Log.e("mylogs", "-onCreate");
         //initialize
         polygons = getPolygons();
         playButton = (ImageButton) findViewById(R.id.playButton);
@@ -126,6 +126,9 @@ public class TourActivity extends Activity {
             audioProgress reset to 0
             populate transcript map
             populate linear layout
+
+
+once a user manually clicks pause, automated audio tour is paused
         */
 
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -142,21 +145,14 @@ public class TourActivity extends Activity {
                         if (currentZone != zone) {
                             //If audio is not playing,
                             if (musicService.getCurrentPosition() == 0) {
-                                //populate transcript map
                                 transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
-                                //populate linear layout
                                 populateLinearLayoutTranscript();
                                 //play new zone audio
                                 musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
                                 musicService.playAudio();
                                 scheduleTranscriptTimerTask();
-//                                  playAudio(getResidFromZone(zone));
                                 setPlayButtonToPause();
-                                //playButton.setBackgroundResource(R.drawable.pause);
-                                //postdelayed highlight function
-//                                audioHandler.post(audioRunnable);
                             }
-                            //currentZone = zone
                             currentZone = zone;
                         }
                     }
@@ -250,31 +246,31 @@ public class TourActivity extends Activity {
         Intent msIntent = new Intent(getApplicationContext(), MusicService.class);
         serviceConnection = getServiceConnection();
         bindService(msIntent, serviceConnection, BIND_AUTO_CREATE);
-        Log.e("UserAction", "---onStart");
+        Log.e("mylogs", "---onStart");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.e("UserAction", "--onStop");
+        Log.e("mylogs", "--onStop");
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         outState.putInt("currentZone", currentZone);
-        Log.e("UserAction", "-----onSaveInstanceState");
+        Log.e("mylogs", "-----onSaveInstanceState");
         super.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("UserAction", "---Pause");
+        Log.e("mylogs", "---Pause");
     }
 
     @Override
     protected void onDestroy() {
-        Log.e("UserAction", "onDestroy");
+        Log.e("mylogs", "onDestroy");
         if(serviceConnection != null){
             unbindService(serviceConnection);
         }
@@ -284,7 +280,7 @@ public class TourActivity extends Activity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.e("UserAction", "-onRestart");
+        Log.e("mylogs", "-onRestart");
     }
 
     @Override
