@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.BufferedReader;
@@ -48,6 +49,9 @@ public class TourActivity extends Activity {
     private int scrollingInt = 0;
     private int previousIndexOfChild = -1;
     private double[][][] polygons;
+    private SeekBar audioSeekBar;
+    private TextView currentProgressTextView;
+    private TextView maxProgressTextView;
     private Timer transcriptTimer;
     private TimerTask transcriptTimerTask;
 
@@ -64,6 +68,9 @@ public class TourActivity extends Activity {
         enableGPSTextView = (TextView) findViewById(R.id.enableGPSTextView);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
         scrollViewTranscript = (ScrollView) findViewById(R.id.scrollViewTranscript);
+        audioSeekBar = (SeekBar) findViewById(R.id.audioSeekBar);
+        currentProgressTextView = (TextView) findViewById(R.id.currentProgressTextView);
+        maxProgressTextView = (TextView) findViewById(R.id.maxProgressTextView);
         audioHandler = new Handler();
         audioRunnable = new Runnable() {
             @Override
@@ -89,6 +96,7 @@ public class TourActivity extends Activity {
                         if (musicService.isPlaying()) {
                             if(linearLayoutTranscript.getChildCount() > 0) {
                                 highlightTranscript();
+                                updateSeekBar();
                             }
                         } else {
                             setPlayButtonToPlay();
@@ -149,6 +157,7 @@ once a user manually clicks pause, automated audio tour is paused
                                 populateLinearLayoutTranscript();
                                 //play new zone audio
                                 musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+                                configureSeekBar();
                                 musicService.playAudio();
                                 scheduleTranscriptTimerTask();
                                 setPlayButtonToPause();
@@ -534,12 +543,13 @@ once a user manually clicks pause, automated audio tour is paused
                     Log.e("mylogs", "something be wrong");
                 } else {
                    introPlayed = true;
-                    transcript = getTranscriptFromTextFile("transcript_intro.txt");
-                    populateLinearLayoutTranscript();
-                    musicService.setAudio(getApplicationContext(), R.raw.intro);
-                    musicService.playAudio();
-                    setPlayButtonToPause();
-//                    audioHandler.post(audioRunnable);
+                   transcript = getTranscriptFromTextFile("transcript_intro.txt");
+                   populateLinearLayoutTranscript();
+                   musicService.setAudio(getApplicationContext(), R.raw.intro);
+                   configureSeekBar();
+                   musicService.playAudio();
+                   setPlayButtonToPause();
+        //                  audioHandler.post(audioRunnable);
                    scheduleTranscriptTimerTask();
                 }
             }
@@ -551,5 +561,22 @@ once a user manually clicks pause, automated audio tour is paused
             transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, 1000);
         }
         transcriptTimerTaskScheduled = true;
+    }
+
+    public void configureSeekBar(){
+        maxProgressTextView.setText(formatFromMilliseconds(musicService.getAudioLength()));
+        audioSeekBar.setMax(musicService.getAudioLength());
+        currentProgressTextView.setText("0:00");
+    }
+
+    public void updateSeekBar(){
+        currentProgressTextView.setText(formatFromMilliseconds(musicService.getCurrentPosition()));
+        audioSeekBar.setProgress(musicService.getCurrentPosition());
+    }
+
+    public String formatFromMilliseconds(int milli){
+        Log.e("mylogs", milli * 0.001 + "mult");
+        Log.e("mylogs", milli / 1000 + "div");
+        return (Math.round(milli * 0.001) / 60) + ":" + String.format("%02d",(Math.round(milli * 0.001) % 60));
     }
 }

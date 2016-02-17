@@ -82,6 +82,10 @@ public class MusicService extends Service {
         return mp.getCurrentPosition();
     }
 
+    public int getAudioLength(){
+        return mp.getDuration();
+    }
+
     public class LocalBinder extends Binder {
         public MusicService getServiceInstance(){
             return MusicService.this;
