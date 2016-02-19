@@ -36,6 +36,7 @@ public class TourActivity extends Activity {
     private boolean transcriptTimerTaskScheduled = false;
     private boolean introPlayed = false;
     private boolean serviceBound = false;
+    private boolean seeking = false;
     private TextView enableGPSTextView;
     private Handler audioHandler;
     private ImageButton playButton;
@@ -93,13 +94,15 @@ public class TourActivity extends Activity {
                     @Override
                     public void run() {
                         Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
-                        if (musicService.isPlaying()) {
-                            if(linearLayoutTranscript.getChildCount() > 0) {
-                                highlightTranscript();
-                                updateSeekBar();
+                        if(!seeking) {
+                            if (musicService.isPlaying()) {
+                                if (linearLayoutTranscript.getChildCount() > 0) {
+                                    highlightTranscript();
+                                    updateSeekBar();
+                                }
+                            } else {
+                                setPlayButtonToPlay();
                             }
-                        } else {
-                            setPlayButtonToPlay();
                         }
                     }
                 });
@@ -244,6 +247,30 @@ once a user manually clicks pause, automated audio tour is paused
                     scrollingInt += 1;
                 }
                 return false;
+            }
+        });
+
+        audioSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(fromUser) {
+                    musicService.seekTo(progress);
+                    Log.e("UserAction","Seek Bar Touched");
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                seeking = true;
+                musicService.pauseAudio();
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seeking = false;
+                unhighlightTranscript();
+                highlightTranscript();
+                musicService.playAudio();
             }
         });
     }
@@ -439,6 +466,16 @@ once a user manually clicks pause, automated audio tour is paused
         previousIndexOfChild = indexOfChild;
     }
 
+    public void unhighlightTranscript(){
+        for(int cnt = 0; cnt < linearLayoutTranscript.getChildCount(); cnt++){
+            linearLayoutTranscript.getChildAt(cnt).setBackgroundColor(Color.parseColor("#00000000"));
+            linearLayoutTranscript.getChildAt(cnt).setPadding(0, 5, 0, 5);
+            ((TextView) linearLayoutTranscript.getChildAt(cnt)).setTextColor(Color.parseColor("#60000000"));
+            ((TextView) linearLayoutTranscript.getChildAt(cnt)).setTextSize(18);
+            ((TextView) linearLayoutTranscript.getChildAt(cnt)).setGravity(Gravity.CENTER_HORIZONTAL);
+        }
+    }
+
     public int getIndexFromAudioProgress() {
         Integer[] transcriptTimes = transcript.keySet().toArray(new Integer[transcript.keySet().size()]);
         for (int cnt = 0; cnt < transcriptTimes.length; cnt++) {
@@ -558,13 +595,14 @@ once a user manually clicks pause, automated audio tour is paused
 
     public void scheduleTranscriptTimerTask(){
         if(!transcriptTimerTaskScheduled) {
-            transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, 1000);
+            transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, 250);
         }
         transcriptTimerTaskScheduled = true;
     }
 
     public void configureSeekBar(){
         maxProgressTextView.setText(formatFromMilliseconds(musicService.getAudioLength()));
+        audioSeekBar.setProgress(0);
         audioSeekBar.setMax(musicService.getAudioLength());
         currentProgressTextView.setText("0:00");
     }

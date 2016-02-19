@@ -86,6 +86,10 @@ public class MusicService extends Service {
         return mp.getDuration();
     }
 
+    public void seekTo(int progress){
+        mp.seekTo(progress);
+    }
+
     public class LocalBinder extends Binder {
         public MusicService getServiceInstance(){
             return MusicService.this;
