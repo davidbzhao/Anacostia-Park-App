@@ -55,6 +55,7 @@ public class TourActivity extends Activity {
     private TextView maxProgressTextView;
     private Timer transcriptTimer;
     private TimerTask transcriptTimerTask;
+    private Integer[] transcriptTimes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -430,6 +431,7 @@ once a user manually clicks pause, automated audio tour is paused
             textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             linearLayoutTranscript.addView(textView);
         }
+        transcriptTimes = transcript.keySet().toArray(new Integer[transcript.keySet().size()]);
     }
 
     public void highlightTranscript() {
@@ -477,7 +479,6 @@ once a user manually clicks pause, automated audio tour is paused
     }
 
     public int getIndexFromAudioProgress() {
-        Integer[] transcriptTimes = transcript.keySet().toArray(new Integer[transcript.keySet().size()]);
         for (int cnt = 0; cnt < transcriptTimes.length; cnt++) {
             if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
                 return cnt - 1;
@@ -613,8 +614,6 @@ once a user manually clicks pause, automated audio tour is paused
     }
 
     public String formatFromMilliseconds(int milli){
-        Log.e("mylogs", milli * 0.001 + "mult");
-        Log.e("mylogs", milli / 1000 + "div");
         return (Math.round(milli * 0.001) / 60) + ":" + String.format("%02d",(Math.round(milli * 0.001) % 60));
     }
 }
