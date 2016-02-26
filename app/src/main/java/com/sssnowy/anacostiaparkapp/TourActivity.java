@@ -48,7 +48,7 @@ public class TourActivity extends Activity {
     private TreeMap<Integer, String> transcript;
     private ScrollView scrollViewTranscript;
     private int scrollingInt = 0;
-    private int previousIndexOfChild = -1;
+    private int previousIndexOfChild = 0;
     private double[][][] polygons;
     private SeekBar audioSeekBar;
     private TextView currentProgressTextView;
@@ -435,7 +435,8 @@ once a user manually clicks pause, automated audio tour is paused
     }
 
     public void highlightTranscript() {
-        final int indexOfChild = getIndexFromAudioProgress();
+        Log.e("mylogs", "previous: " + previousIndexOfChild);
+        final int indexOfChild = getIndexFromAudioProgress(previousIndexOfChild);
         if(indexOfChild != previousIndexOfChild){
             Log.e("mylogs","highlight transcript");
             if (indexOfChild != 0) {
@@ -478,12 +479,31 @@ once a user manually clicks pause, automated audio tour is paused
         }
     }
 
-    public int getIndexFromAudioProgress() {
-        for (int cnt = 0; cnt < transcriptTimes.length; cnt++) {
-            if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
-                return cnt - 1;
+    //chances are the index is either the previous index or the one after the previous index, test those first, if not, binary search
+    public int getIndexFromAudioProgress(int previousIndexOfChild) {
+        if(musicService.getCurrentPosition() > transcriptTimes[previousIndexOfChild]){
+            for (int cnt = previousIndexOfChild; cnt < transcriptTimes.length; cnt++) {
+                if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
+                    return cnt - 1;
+                }
+            }
+        } else {
+            for (int cnt = 0; cnt < previousIndexOfChild; cnt++) {
+                if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
+                    return cnt - 1;
+                }
             }
         }
+//        if(musicService.getCurrentPosition() > transcriptTimes[previousIndexOfChild] && musicService.getCurrentPosition() < transcriptTimes[previousIndexOfChild + 1]){
+//            return previousIndexOfChild;
+//        } else if(musicService.getCurrentPosition() > transcriptTimes[previousIndexOfChild + 1] && musicService.getCurrentPosition() < transcriptTimes[previousIndexOfChild + 2]){
+//            return previousIndexOfChild + 1;
+//        } else
+//        for (int cnt = previousIndexOfChild; cnt < transcriptTimes.length; cnt++) {
+//            if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
+//                return cnt - 1;
+//            }
+//        }
         return transcriptTimes.length - 1;
     }
 
