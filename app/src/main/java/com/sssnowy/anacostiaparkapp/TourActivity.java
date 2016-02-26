@@ -87,28 +87,6 @@ public class TourActivity extends Activity {
                 }*/
             }
         };
-        transcriptTimer = new Timer();
-        transcriptTimerTask = new TimerTask() {
-            @Override
-            public void run() {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
-                        if(!seeking) {
-                            if (musicService.isPlaying()) {
-                                if (linearLayoutTranscript.getChildCount() > 0) {
-                                    highlightTranscript();
-                                    updateSeekBar();
-                                }
-                            } else {
-                                setPlayButtonToPlay();
-                            }
-                        }
-                    }
-                });
-            }
-        };
 
 
         setPlayButtonToPlay();
@@ -143,8 +121,8 @@ public class TourActivity extends Activity {
 once a user manually clicks pause, automated audio tour is paused
         */
 
-        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        LocationListener locationListener = new LocationListener() {
+        final LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        final LocationListener locationListener = new LocationListener() {
             //If location changes,
             @Override
             public void onLocationChanged(Location location) {
@@ -254,9 +232,9 @@ once a user manually clicks pause, automated audio tour is paused
         audioSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(fromUser) {
+                if (fromUser) {
                     musicService.seekTo(progress);
-                    Log.e("UserAction","Seek Bar Touched");
+                    Log.e("UserAction", "Seek Bar Touched");
                 }
             }
 
@@ -274,6 +252,30 @@ once a user manually clicks pause, automated audio tour is paused
                 musicService.playAudio();
             }
         });
+
+
+        transcriptTimer = new Timer();
+        transcriptTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_DISPLAY);
+                        if(!seeking) {
+                            if (musicService.isPlaying()) {
+                                if (linearLayoutTranscript.getChildCount() > 0) {
+                                    highlightTranscript();
+                                    updateSeekBar();
+                                }
+                            } else {
+                                setPlayButtonToPlay();
+                            }
+                        }
+                    }
+                });
+            }
+        };
     }
 
     @Override
@@ -435,7 +437,6 @@ once a user manually clicks pause, automated audio tour is paused
     }
 
     public void highlightTranscript() {
-        Log.e("mylogs", "previous: " + previousIndexOfChild);
         final int indexOfChild = getIndexFromAudioProgress(previousIndexOfChild);
         if(indexOfChild != previousIndexOfChild){
             Log.e("mylogs","highlight transcript");
@@ -481,15 +482,20 @@ once a user manually clicks pause, automated audio tour is paused
 
     //chances are the index is either the previous index or the one after the previous index, test those first, if not, binary search
     public int getIndexFromAudioProgress(int previousIndexOfChild) {
+        Log.e("mylogs","=====");
         if(musicService.getCurrentPosition() > transcriptTimes[previousIndexOfChild]){
-            for (int cnt = previousIndexOfChild; cnt < transcriptTimes.length; cnt++) {
+            for (int cnt = previousIndexOfChild + 1; cnt < transcriptTimes.length; cnt++) {
+                Log.e("mylogs","-");
                 if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
+                    Log.e("mylogs","=====");
                     return cnt - 1;
                 }
             }
         } else {
             for (int cnt = 0; cnt < previousIndexOfChild; cnt++) {
+                Log.e("mylogs","--");
                 if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
+                    Log.e("mylogs","=====");
                     return cnt - 1;
                 }
             }
@@ -504,6 +510,7 @@ once a user manually clicks pause, automated audio tour is paused
 //                return cnt - 1;
 //            }
 //        }
+        Log.e("mylogs","=====");
         return transcriptTimes.length - 1;
     }
 
