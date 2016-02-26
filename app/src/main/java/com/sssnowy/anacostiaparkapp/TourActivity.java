@@ -482,12 +482,10 @@ once a user manually clicks pause, automated audio tour is paused
 
     //chances are the index is either the previous index or the one after the previous index, test those first, if not, binary search
     public int getIndexFromAudioProgress(int previousIndexOfChild) {
-        Log.e("mylogs","=====");
         if(musicService.getCurrentPosition() > transcriptTimes[previousIndexOfChild]){
             for (int cnt = previousIndexOfChild + 1; cnt < transcriptTimes.length; cnt++) {
                 Log.e("mylogs","-");
                 if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
-                    Log.e("mylogs","=====");
                     return cnt - 1;
                 }
             }
@@ -495,7 +493,6 @@ once a user manually clicks pause, automated audio tour is paused
             for (int cnt = 0; cnt < previousIndexOfChild; cnt++) {
                 Log.e("mylogs","--");
                 if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
-                    Log.e("mylogs","=====");
                     return cnt - 1;
                 }
             }
