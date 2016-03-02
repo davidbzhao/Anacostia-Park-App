@@ -133,16 +133,19 @@ once a user manually clicks pause, automated audio tour is paused
                     if(!musicService.isPlaying()) {
                         //If enters new zone,
                         if (currentZone != zone) {
-                            //If audio is not playing,
-                            if (musicService.getCurrentPosition() == 0) {
-                                transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
-                                populateLinearLayoutTranscript();
-                                //play new zone audio
-                                musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
-                                configureSeekBar();
-                                musicService.playAudio();
-                                scheduleTranscriptTimerTask();
-                                setPlayButtonToPause();
+                            //If this zone has audio
+                            if(zone != -1) {
+                                //If audio is not playing,
+                                if (musicService.getCurrentPosition() == 0) {
+                                    transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
+                                    populateLinearLayoutTranscript();
+                                    //play new zone audio
+                                    musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+                                    configureSeekBar();
+                                    musicService.playAudio();
+                                    scheduleTranscriptTimerTask();
+                                    setPlayButtonToPause();
+                                }
                             }
                             currentZone = zone;
                         }
@@ -347,7 +350,7 @@ once a user manually clicks pause, automated audio tour is paused
                 return cnt;
             }
         }
-        return 1;
+        return -1;
     }
 
     public int getResidFromZone(int zone) {
