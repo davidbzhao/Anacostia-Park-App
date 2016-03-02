@@ -75,6 +75,9 @@ public class TourActivity extends Activity {
 
 
         setPlayButtonToPlay();
+        if(isGPSOn()) {
+            enableGPSTextView.setVisibility(View.INVISIBLE);
+        }
         //--------------------------------------------------------------------------------------------------------Listeners
         /*
         note: dropdown for zone?
@@ -132,6 +135,15 @@ once a user manually clicks pause, automated audio tour is paused
                                         musicService.playAudio();
                                         scheduleTranscriptTimerTask();
                                         setPlayButtonToPause();
+                                        previousIndexOfChild = 0;
+                                    }
+                                } else { //SD:KF:LKJDS:LKJ:LKJDSF:LKJDSF:LKJGR:LKJGER:LKJHGERKJHGERIUHGEROIUERGOIUGEROIUHGEROIUGERGER
+                                    //If audio is not playing,
+                                    if (musicService.getCurrentPosition() == 0) {
+                                        transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
+                                        populateLinearLayoutTranscript();
+                                        musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+                                        configureSeekBar();
                                         previousIndexOfChild = 0;
                                     }
                                 }
@@ -555,7 +567,6 @@ once a user manually clicks pause, automated audio tour is paused
     public void playIntro(){
         //if not already heard
         if(isGPSOn()) {
-            enableGPSTextView.setVisibility(View.INVISIBLE);
             if (serviceBound) {
                if (musicService.isPlaying()) {
                     Log.e("mylogs", "something be wrong");

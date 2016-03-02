@@ -60,6 +60,7 @@ public class MusicService extends Service {
             public void onCompletion(MediaPlayer mp) {
                 SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
                 sharedPreferences.edit().putBoolean("resid" + resid, true).commit();
+                Log.e("mylogs","OMGOMGOMGOMG we finished");
                 mp.seekTo(0);
             }
         });

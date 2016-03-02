@@ -37,8 +37,7 @@
         android:text="Enable GPS to Activate Audio Tour"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:textColor="@color/colorAccent"
-        android:background="#FFF" />
+        android:textColor="@color/colorAccent"/>
 
     <LinearLayout
         android:orientation="horizontal"

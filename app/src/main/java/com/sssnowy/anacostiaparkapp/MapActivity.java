@@ -24,6 +24,7 @@ import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -57,9 +58,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng tjlatlng = new LatLng(38.817328, -77.169412);
-        mMap.addMarker(new MarkerOptions().position(tjlatlng).title("Marker in TJ"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(tjlatlng, 15f));
+        LatLng defaultLatLng = new LatLng(38.817328, -77.169412);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLatLng, 15f));
 
 //        BitmapDescriptor image = BitmapDescriptorFactory.fromResource(R.drawable.map);
 //        LatLngBounds latLngBounds = new LatLngBounds(new LatLng(38.817328, -77.169412), new LatLng(38.818726, -77.167678));
@@ -88,17 +88,22 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 .fillColor(ContextCompat.getColor(this, R.color.zoneFill)));
 
 
-        final Circle userLocation = mMap.addCircle(new CircleOptions()
-                .center(new LatLng(0, 0))
-                .fillColor(ContextCompat.getColor(MapActivity.this, R.color.colorAccent))
-                .strokeWidth(0.0f)
-                .radius(5.0));
+//        final Circle userLocation = mMap.addCircle(new CircleOptions()
+//                .center(new LatLng(0, 0))
+//                .fillColor(ContextCompat.getColor(MapActivity.this, R.color.colorAccent))
+//                .strokeWidth(0.0f)
+//                .radius(5.0));
+
+        final Marker userLocation = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(0, 0))
+                .title("You Are Here!")
+                .flat(true));
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                userLocation.setCenter(new LatLng(location.getLatitude(), location.getLongitude()));
+                userLocation.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
             }
 
             @Override
