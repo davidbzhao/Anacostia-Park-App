@@ -38,12 +38,10 @@ public class TourActivity extends Activity {
     private boolean serviceBound = false;
     private boolean seeking = false;
     private TextView enableGPSTextView;
-    private Handler audioHandler;
     private ImageButton playButton;
     private int currentZone = -1;
     private LinearLayout linearLayoutTranscript;
     private MusicService musicService;
-    private Runnable audioRunnable;
     private ServiceConnection serviceConnection;
     private TreeMap<Integer, String> transcript;
     private ScrollView scrollViewTranscript;
@@ -73,20 +71,6 @@ public class TourActivity extends Activity {
         audioSeekBar = (SeekBar) findViewById(R.id.audioSeekBar);
         currentProgressTextView = (TextView) findViewById(R.id.currentProgressTextView);
         maxProgressTextView = (TextView) findViewById(R.id.maxProgressTextView);
-        audioHandler = new Handler();
-        audioRunnable = new Runnable() {
-            @Override
-            public void run() {
-                /*if (musicService.isPlaying()) {
-                    if(linearLayoutTranscript.getChildCount() > 0) {
-                        highlightTranscript();
-                        audioHandler.postDelayed(this, 1000);
-                    }
-                } else {
-                    setPlayButtonToPlay();
-                }*/
-            }
-        };
 
 
         setPlayButtonToPlay();
@@ -193,9 +177,6 @@ once a user manually clicks pause, automated audio tour is paused
                         musicService.playAudio();
                         scheduleTranscriptTimerTask();
                         setPlayButtonToPause();
-//                        playButton.setBackgroundResource(R.drawable.pause);
-                        //postDelayed highlight function
-//                        audioHandler.post(audioRunnable);
                         ((TextView)linearLayoutTranscript.getChildAt(linearLayoutTranscript.getChildCount() - 1)).setTextColor(Color.parseColor("#60000000"));
                     }
                     //If audio is playing,
@@ -203,7 +184,6 @@ once a user manually clicks pause, automated audio tour is paused
                     //pause audio
                     musicService.pauseAudio();
                     setPlayButtonToPlay();
-//                    playButton.setBackgroundResource(R.drawable.play);
                 }
             }
         });
@@ -218,11 +198,6 @@ once a user manually clicks pause, automated audio tour is paused
                     if (scrollingInt < 0) {
                         Log.e("mylogs", "WOAHWOAHWOAH!!!! That ain't right");
                     }
-//                    new Handler().postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                        }
-//                    }, 1000);
                 } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     Log.e("UserAction", "Scroll View Touched ACTION_DOWN");
                     Log.e("mylogs", "ACTION_DOWN");
@@ -444,31 +419,17 @@ once a user manually clicks pause, automated audio tour is paused
         if(indexOfChild != previousIndexOfChild){
             Log.e("mylogs","highlight transcript");
             if (indexOfChild != 0) {
-//            linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(ContextCompat.getColor(this, R.color.colorAccent));
                 linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(Color.parseColor("#00000000"));
                 linearLayoutTranscript.getChildAt(indexOfChild - 1).setPadding(0, 5, 0, 5);
                 ((TextView) linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextColor(Color.parseColor("#60000000"));
                 ((TextView) linearLayoutTranscript.getChildAt(indexOfChild - 1)).setTextSize(18);
                 ((TextView) linearLayoutTranscript.getChildAt(indexOfChild - 1)).setGravity(Gravity.CENTER_HORIZONTAL);
             }
-//        linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundResource(R.drawable.rounded_corner);
-            //linearLayoutTranscript.getChildAt(indexOfChild).setBackgroundColor(Color.parseColor("#666666"));
-            //linearLayoutTranscript.getChildAt(indexOfChild).setPadding(0, 10, 0, 10);
-//        ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(Color.parseColor("#FF000000"));
             ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
-//        ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextSize(20);
             ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setGravity(Gravity.CENTER);
             if(scrollingInt <= 0){
                 scrollViewTranscript.scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView) findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
             }
-//            new Handler().post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if(scrollingInt <= 0){
-//                        scrollViewTranscript.scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView) findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
-//                    }
-//                }
-//            });
         }
         previousIndexOfChild = indexOfChild;
     }
@@ -500,16 +461,6 @@ once a user manually clicks pause, automated audio tour is paused
                 }
             }
         }
-//        if(musicService.getCurrentPosition() > transcriptTimes[previousIndexOfChild] && musicService.getCurrentPosition() < transcriptTimes[previousIndexOfChild + 1]){
-//            return previousIndexOfChild;
-//        } else if(musicService.getCurrentPosition() > transcriptTimes[previousIndexOfChild + 1] && musicService.getCurrentPosition() < transcriptTimes[previousIndexOfChild + 2]){
-//            return previousIndexOfChild + 1;
-//        } else
-//        for (int cnt = previousIndexOfChild; cnt < transcriptTimes.length; cnt++) {
-//            if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
-//                return cnt - 1;
-//            }
-//        }
         Log.e("mylogs","=====");
         return transcriptTimes.length - 1;
     }
@@ -522,8 +473,6 @@ once a user manually clicks pause, automated audio tour is paused
                 MusicService.LocalBinder localBinder = (MusicService.LocalBinder) service;
                 musicService = localBinder.getServiceInstance();
                 serviceBound = true;
-//                audioHandler.post(audioRunnable);
-//                transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, 1000);
                 if(!introPlayed) {
                     playIntro();
                 }
@@ -614,7 +563,6 @@ once a user manually clicks pause, automated audio tour is paused
                    configureSeekBar();
                    musicService.playAudio();
                    setPlayButtonToPause();
-        //                  audioHandler.post(audioRunnable);
                    scheduleTranscriptTimerTask();
                 }
             }
