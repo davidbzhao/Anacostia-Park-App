@@ -36,7 +36,6 @@ public class TourActivity extends Activity {
     private static final int NUMBER_OF_ZONES = 3;
     public static final String SHARED_PREFERENCES = "audioZonesVisited";
     private boolean transcriptTimerTaskScheduled = false;
-    private boolean introPlayed = false;
     private boolean serviceBound = false;
     private boolean seeking = false;
     private TextView enableGPSTextView;
@@ -133,6 +132,7 @@ once a user manually clicks pause, automated audio tour is paused
                                         musicService.playAudio();
                                         scheduleTranscriptTimerTask();
                                         setPlayButtonToPause();
+                                        previousIndexOfChild = 0;
                                     }
                                 }
                             }
@@ -149,7 +149,9 @@ once a user manually clicks pause, automated audio tour is paused
             @Override
             public void onProviderEnabled(String provider) {
                 enableGPSTextView.setVisibility(View.INVISIBLE);
-                playIntro();
+                if (!introPlayed()) {
+                    playIntro();
+                }
                 Toast.makeText(TourActivity.this, "on", Toast.LENGTH_SHORT).show();
                 Log.e("mylogs","GPS Turned ON");
             }
@@ -475,7 +477,7 @@ once a user manually clicks pause, automated audio tour is paused
                 MusicService.LocalBinder localBinder = (MusicService.LocalBinder) service;
                 musicService = localBinder.getServiceInstance();
                 serviceBound = true;
-                if(!introPlayed) {
+                if (!introPlayed()) {
                     playIntro();
                 }
                 Log.e("mylogs", "------Service Connected");
@@ -558,17 +560,22 @@ once a user manually clicks pause, automated audio tour is paused
                if (musicService.isPlaying()) {
                     Log.e("mylogs", "something be wrong");
                 } else {
-                   introPlayed = true;
                    transcript = getTranscriptFromTextFile("transcript_intro.txt");
                    populateLinearLayoutTranscript();
                    musicService.setAudio(getApplicationContext(), R.raw.intro);
+                   previousIndexOfChild = 0;
                    configureSeekBar();
                    musicService.playAudio();
                    setPlayButtonToPause();
                    scheduleTranscriptTimerTask();
+                   getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit().putBoolean("introPlayed", true).commit();
                 }
             }
         }
+    }
+
+    public boolean introPlayed(){
+        return getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("introPlayed", false);
     }
 
     public void scheduleTranscriptTimerTask(){
