@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -33,6 +34,7 @@ import java.util.TreeMap;
 
 public class TourActivity extends Activity {
     private static final int NUMBER_OF_ZONES = 3;
+    public static final String SHARED_PREFERENCES = "audioZonesVisited";
     private boolean transcriptTimerTaskScheduled = false;
     private boolean introPlayed = false;
     private boolean serviceBound = false;
@@ -119,16 +121,19 @@ once a user manually clicks pause, automated audio tour is paused
                         if (currentZone != zone) {
                             //If this zone has audio
                             if(zone != -1) {
-                                //If audio is not playing,
-                                if (musicService.getCurrentPosition() == 0) {
-                                    transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
-                                    populateLinearLayoutTranscript();
-                                    //play new zone audio
-                                    musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
-                                    configureSeekBar();
-                                    musicService.playAudio();
-                                    scheduleTranscriptTimerTask();
-                                    setPlayButtonToPause();
+                                //If zone not previously entered
+                                if(!audioZoneVisited(zone)) {
+                                    //If audio is not playing,
+                                    if (musicService.getCurrentPosition() == 0) {
+                                        transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
+                                        populateLinearLayoutTranscript();
+                                        //play new zone audio
+                                        musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+                                        configureSeekBar();
+                                        musicService.playAudio();
+                                        scheduleTranscriptTimerTask();
+                                        setPlayButtonToPause();
+                                    }
                                 }
                             }
                             currentZone = zone;
@@ -448,20 +453,17 @@ once a user manually clicks pause, automated audio tour is paused
     public int getIndexFromAudioProgress(int previousIndexOfChild) {
         if(musicService.getCurrentPosition() > transcriptTimes[previousIndexOfChild]){
             for (int cnt = previousIndexOfChild + 1; cnt < transcriptTimes.length; cnt++) {
-                Log.e("mylogs","-");
                 if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
                     return cnt - 1;
                 }
             }
         } else {
             for (int cnt = 0; cnt < previousIndexOfChild; cnt++) {
-                Log.e("mylogs","--");
                 if (transcriptTimes[cnt] > musicService.getCurrentPosition()) {
                     return cnt - 1;
                 }
             }
         }
-        Log.e("mylogs","=====");
         return transcriptTimes.length - 1;
     }
 
@@ -590,5 +592,10 @@ once a user manually clicks pause, automated audio tour is paused
 
     public String formatFromMilliseconds(int milli){
         return (Math.round(milli * 0.001) / 60) + ":" + String.format("%02d",(Math.round(milli * 0.001) % 60));
+    }
+
+    public boolean audioZoneVisited(int zone){
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean("resid" + getResidFromZone(zone), false);
     }
 }
