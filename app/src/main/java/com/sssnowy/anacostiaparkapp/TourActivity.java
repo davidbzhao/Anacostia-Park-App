@@ -293,18 +293,10 @@ public class TourActivity extends Activity {
     }
 
     public String getFilenameFromZone(int zone) {
-        switch(zone){
-            case -1:
-                return "transcript_intro.txt";
-            case 0:
-                return "transcript_0.txt";
-            case 1:
-                return "transcript_1.txt";
-            case 2:
-                return "transcript_2.txt";
-            default:
-                return "transcript_2.txt";
+        if(-2 < zone && zone < NUMBER_OF_ZONES){
+            return String.format("transcript_%d.txt", zone);
         }
+        return "transcript_2.txt";
     }
 
     public int numberOfLinesCrossed(double latitude, double longitude, double[][] polygon) {

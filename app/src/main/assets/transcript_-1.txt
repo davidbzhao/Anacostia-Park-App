@@ -1,0 +1,9 @@
+0=...
+575=Welcome to the Anacostia National Park.
+3298=Me, along with a few friends of mine,
+5208=will be taking you along a tour through the park.
+7629=All you have to do is move around.
+9917=You can walk, bike, or even kayak.
+12059=Just put your headphones in and
+13360=Let's begin!
+999999=...
