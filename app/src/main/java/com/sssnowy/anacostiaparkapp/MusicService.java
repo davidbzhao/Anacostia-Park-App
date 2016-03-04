@@ -17,8 +17,6 @@ import android.widget.Toast;
  */
 public class MusicService extends Service {
     private MediaPlayer mp;
-    private int curResid;
-    public static final String ACTION_PLAY = "com.sssnowy.anacostiaparkapp.action.ACTION_PLAY";
     private IBinder binder = new LocalBinder();
 
     @Nullable
@@ -30,37 +28,22 @@ public class MusicService extends Service {
     @Override
     public void onCreate() {
         mp = new MediaPlayer();
-        Log.e("mylogs","Music Service: onCreate");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.e("mylogs", "onStartCommand ------------------------------ " + intent.getAction());
-//        if(intent.getAction() != null){
-//            if(intent.getAction().equals(ACTION_PLAY)){
-//                setAudio(MusicService.this, R.raw.empirestateofmind);
-//            }
-//        }
         return START_STICKY;
     }
 
-    @Override
-    public void onDestroy() {
-        Log.e("UserAction", "Music Service: override onDestroy");
-        //stopSelf();
-//        mp.release();
-    }
-
     public void setAudio(Context c, final int resid){
-        curResid = resid;
         mp.reset();
         mp = MediaPlayer.create(c, resid);
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
-                sharedPreferences.edit().putBoolean("resid" + resid, true).commit();
-                Log.e("mylogs","OMGOMGOMGOMG we finished");
+                sharedPreferences.edit().putBoolean("resid" + resid, true).apply();
+                Log.e("mylogs","Audio Finished Playing");
                 mp.seekTo(0);
             }
         });
@@ -76,10 +59,6 @@ public class MusicService extends Service {
 
     public boolean isPlaying(){
         return mp.isPlaying();
-    }
-
-    public int getResid(){
-        return curResid;
     }
 
     public int getCurrentPosition(){

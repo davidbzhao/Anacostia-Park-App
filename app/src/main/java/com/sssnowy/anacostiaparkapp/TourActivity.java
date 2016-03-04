@@ -64,7 +64,7 @@ public class TourActivity extends Activity {
 
         Log.e("mylogs", "-onCreate");
         //initialize
-        polygons = getPolygons();
+        polygons = getPolygons(TourActivity.this);
         playButton = (ImageButton) findViewById(R.id.playButton);
         enableGPSTextView = (TextView) findViewById(R.id.enableGPSTextView);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
@@ -118,6 +118,7 @@ once a user manually clicks pause, automated audio tour is paused
                     Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
                     int zone = getZone(location.getLatitude(), location.getLongitude());
                     Log.e("mylogs", location.getLatitude() + " " + location.getLongitude() + " : " + location.getAccuracy());
+                    MapActivity.updateUserLocation(location);
                     if (serviceBound) {
                         if (!musicService.isPlaying()) {
                             //If enters new zone,
@@ -522,13 +523,13 @@ once a user manually clicks pause, automated audio tour is paused
         }
     }
 
-    public double[][][] getPolygons(){
+    public static double[][][] getPolygons(Context c){
         BufferedReader bufferedReader = null;
         ArrayList<ArrayList<double[]>> temp = new ArrayList<ArrayList<double[]>>();
         for(int cnt = 0; cnt < NUMBER_OF_ZONES; cnt++){
             try {
                 temp.add(new ArrayList<double[]>());
-                bufferedReader = new BufferedReader(new InputStreamReader(getAssets().open("zone_" + cnt + ".txt")));
+                bufferedReader = new BufferedReader(new InputStreamReader(c.getAssets().open("zone_" + cnt + ".txt")));
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     String[] splitLine = line.split(",");
