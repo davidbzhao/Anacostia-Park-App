@@ -76,8 +76,8 @@ public class TourActivity extends Activity {
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             enableGPSTextView.setVisibility(View.INVISIBLE);
         }
+        playButton.setBackgroundResource(R.drawable.play_colored);
 
-        setPlayButtonToPlay();
         setUpTimerTask();
         setUpLocationListener();
         setUpPlayButtonListener();
@@ -159,7 +159,7 @@ public class TourActivity extends Activity {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.e("UserAction","Play Button Clicked");
+                Log.e("UserAction", "Play Button Clicked");
                 //If audio is not playing,
                 if (!musicService.isPlaying()) {
                     //If transcript filled,
@@ -167,14 +167,14 @@ public class TourActivity extends Activity {
                         //play audio
                         musicService.playAudio();
                         scheduleTranscriptTimerTask();
-                        setPlayButtonToPause();
-                        ((TextView)linearLayoutTranscript.getChildAt(linearLayoutTranscript.getChildCount() - 1)).setTextColor(Color.parseColor("#60000000"));
+                        playButton.setBackgroundResource(R.drawable.pause_colored);
+                        ((TextView) linearLayoutTranscript.getChildAt(linearLayoutTranscript.getChildCount() - 1)).setTextColor(Color.parseColor("#60000000"));
                     }
                     //If audio is playing,
                 } else {
                     //pause audio
                     musicService.pauseAudio();
-                    setPlayButtonToPlay();
+                    playButton.setBackgroundResource(R.drawable.play_colored);
                 }
             }
         });
@@ -238,7 +238,7 @@ public class TourActivity extends Activity {
                                     updateSeekBar();
                                 }
                             } else {
-                                setPlayButtonToPlay();
+                                playButton.setBackgroundResource(R.drawable.play_colored);
                             }
                         }
                     }
@@ -268,7 +268,7 @@ public class TourActivity extends Activity {
     public void playCurrentAudio(){
         musicService.playAudio();
         scheduleTranscriptTimerTask();
-        setPlayButtonToPause();
+        playButton.setBackgroundResource(R.drawable.pause_colored);
     }
 
     public int getZone(double latitude, double longitude, double[][][] polygons) {
@@ -437,22 +437,6 @@ public class TourActivity extends Activity {
                 Log.e("mylogs", "Service Disconnected");
             }
         });
-    }
-
-    public void setPlayButtonToPlay(){
-        if(Build.VERSION.SDK_INT < 21){
-            playButton.setBackgroundResource(R.drawable.play_colored);
-        } else {
-            playButton.setBackgroundResource(R.drawable.play);
-        }
-    }
-
-    public void setPlayButtonToPause(){
-        if(Build.VERSION.SDK_INT < 21){
-            playButton.setBackgroundResource(R.drawable.pause_colored);
-        } else {
-            playButton.setBackgroundResource(R.drawable.pause);
-        }
     }
 
     public static double[][][] getPolygons(Context c){

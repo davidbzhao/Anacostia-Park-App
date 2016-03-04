@@ -79,10 +79,9 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:id="@+id/playButton"
-        android:background="@drawable/play"
+        android:background="@drawable/play_colored"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:scaleType="fitXY"
-        android:backgroundTint="@color/colorPrimary"/>
+        android:scaleType="fitXY"/>
 
 </RelativeLayout>
