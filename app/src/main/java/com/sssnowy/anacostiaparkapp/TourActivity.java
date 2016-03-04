@@ -126,7 +126,7 @@ once a user manually clicks pause, automated audio tour is paused
                                 //If zone not previously entered
                                 if(!audioZoneVisited(zone)) {
                                     //If audio is not playing,
-                                    if (musicService.getCurrentPosition() == 0) {
+//                                    if (musicService.getCurrentPosition() == 0) {
                                         transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
                                         populateLinearLayoutTranscript();
                                         //play new zone audio
@@ -136,16 +136,16 @@ once a user manually clicks pause, automated audio tour is paused
                                         scheduleTranscriptTimerTask();
                                         setPlayButtonToPause();
                                         previousIndexOfChild = 0;
-                                    }
+//                                    }
                                 } else { //SD:KF:LKJDS:LKJ:LKJDSF:LKJDSF:LKJGR:LKJGER:LKJHGERKJHGERIUHGEROIUERGOIUGEROIUHGEROIUGERGER
                                     //If audio is not playing,
-                                    if (musicService.getCurrentPosition() == 0) {
+//                                    if (musicService.getCurrentPosition() == 0) {
                                         transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
                                         populateLinearLayoutTranscript();
                                         musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
                                         configureSeekBar();
                                         previousIndexOfChild = 0;
-                                    }
+//                                    }
                                 }
                             }
                             currentZone = zone;
@@ -174,7 +174,7 @@ once a user manually clicks pause, automated audio tour is paused
                 Toast.makeText(TourActivity.this, "off", Toast.LENGTH_SHORT).show();
                 Log.e("mylogs", "GPS Turned OFF");
             }
-        };
+    };
 
         if (checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5, 10, locationListener);
@@ -436,7 +436,6 @@ once a user manually clicks pause, automated audio tour is paused
     public void highlightTranscript() {
         final int indexOfChild = getIndexFromAudioProgress(previousIndexOfChild);
         if(indexOfChild != previousIndexOfChild){
-            Log.e("mylogs","highlight transcript");
             if (indexOfChild != 0) {
                 linearLayoutTranscript.getChildAt(indexOfChild - 1).setBackgroundColor(Color.parseColor("#00000000"));
                 linearLayoutTranscript.getChildAt(indexOfChild - 1).setPadding(0, 5, 0, 5);
