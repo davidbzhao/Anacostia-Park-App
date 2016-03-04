@@ -80,35 +80,18 @@ public class TourActivity extends Activity {
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         final LocationListener locationListener = new LocationListener() {
-            //If location changes,
             @Override
             public void onLocationChanged(Location location) {
-                if(location.getAccuracy() < 100) {
-                    Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
+                //If location legitimately changes...
+                if(location.getAccuracy() < 100){
                     int zone = getZone(location.getLatitude(), location.getLongitude(), getPolygons(TourActivity.this));
-                    Log.e("mylogs", location.getLatitude() + " " + location.getLongitude() + " : " + location.getAccuracy());
-                    MapActivity.updateUserLocation(location);
-                    if (serviceBound) {
-                        if (!musicService.isPlaying()) {
-                            //If enters new zone,
-                            if (currentZone != zone) {
-                                //If this zone has audio
-                                if (zone != -1) {
-                                    //If zone not previously entered
-                                    populateLinearLayoutTranscript(getTranscriptFromTextFile(getFilenameFromZone(zone)));
-                                    musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
-                                    configureSeekBar();
-                                    previousIndexOfChild = 0;
-                                    if (!audioZoneVisited(zone)) {
-                                        //play new zone audio
-                                        musicService.playAudio();
-                                        scheduleTranscriptTimerTask();
-                                        setPlayButtonToPause();
-                                    }
-                                }
-                                currentZone = zone;
-                            }
+                    //if entered a different zone...
+                    if(currentZone != zone && zone != -1){
+                        //if audio is not playing already...
+                        if(serviceBound && !musicService.isPlaying()){
+                            updateTour(zone);
                         }
+                        currentZone = zone;
                     }
                 }
             }
@@ -258,6 +241,26 @@ public class TourActivity extends Activity {
         Intent intent = new Intent(TourActivity.this, MenuActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
+    }
+
+    public void updateTour(int zone){
+        setUpDisplayAndAudio(zone);
+        if(!audioZoneVisited(zone)){
+            playCurrentAudio();
+        }
+    }
+
+    public void setUpDisplayAndAudio(int zone){
+        populateLinearLayoutTranscript(getTranscriptFromTextFile(getFilenameFromZone(zone)));
+        musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+        configureSeekBar();
+        previousIndexOfChild = 0;
+    }
+
+    public void playCurrentAudio(){
+        musicService.playAudio();
+        scheduleTranscriptTimerTask();
+        setPlayButtonToPause();
     }
 
     public int getZone(double latitude, double longitude, double[][][] polygons) {
