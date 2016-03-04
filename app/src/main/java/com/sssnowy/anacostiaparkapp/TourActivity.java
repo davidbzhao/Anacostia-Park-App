@@ -35,6 +35,7 @@ import java.util.TreeMap;
 public class TourActivity extends Activity {
     public static final int NUMBER_OF_ZONES = 3;
     public static final String SHARED_PREFERENCES = "audioZonesVisited";
+    private static final int TRANSCRIPT_UPDATE_INTERVAL = 388;
     private boolean transcriptTimerTaskScheduled = false;
     private boolean serviceBound = false;
     private boolean seeking = false;
@@ -267,7 +268,7 @@ public class TourActivity extends Activity {
 
     public int getZone(double latitude, double longitude, double[][][] polygons) {
         for (int cnt = 0; cnt < polygons.length; cnt++) {
-            int intersections = numberOfLinesCrossed(polygons[cnt], latitude, longitude);
+            int intersections = numberOfLinesCrossed(latitude, longitude, polygons[cnt]);
             Toast.makeText(TourActivity.this, intersections + "", Toast.LENGTH_SHORT).show();
             if (intersections % 2 == 1) {
                 return cnt;
@@ -306,7 +307,7 @@ public class TourActivity extends Activity {
         }
     }
 
-    public int numberOfLinesCrossed(double[][] polygon, double latitude, double longitude) {
+    public int numberOfLinesCrossed(double latitude, double longitude, double[][] polygon) {
         int intersections = 0;
         for (int cnt = 0; cnt < polygon.length; cnt++) {
             double[] point1 = polygon[cnt];
@@ -344,8 +345,8 @@ public class TourActivity extends Activity {
             if (bufferedReader != null) {
                 try {
                     bufferedReader.close();
-                } catch (IOException e) {
-
+                } catch (IOException ignored) {
+                    Log.e("mylogs","Buffered Reader Broken");
                 }
             }
         }
@@ -355,9 +356,9 @@ public class TourActivity extends Activity {
     public void populateLinearLayoutTranscript(TreeMap<Integer, String> transcript) {
         linearLayoutTranscript.removeAllViews();
         String[] transcriptArray = transcript.values().toArray(new String[transcript.size()]);
-        for (int cnt = 0; cnt < transcriptArray.length; cnt++) {
+        for (String line : transcriptArray) {
             TextView textView = new TextView(this);
-            textView.setText(transcriptArray[cnt]);
+            textView.setText(line);
             textView.setTextColor(Color.parseColor("#60000000"));
             textView.setTextSize(18);
             textView.setGravity(Gravity.CENTER_HORIZONTAL);
@@ -385,7 +386,7 @@ public class TourActivity extends Activity {
             ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setTextColor(ContextCompat.getColor(this, R.color.colorAccent));
             ((TextView) linearLayoutTranscript.getChildAt(indexOfChild)).setGravity(Gravity.CENTER);
             if(scrollingInt <= 0){
-                scrollViewTranscript.scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - ((ScrollView) findViewById(R.id.scrollViewTranscript)).getHeight() / 2);
+                scrollViewTranscript.scrollTo(0, linearLayoutTranscript.getChildAt(indexOfChild).getTop() - findViewById(R.id.scrollViewTranscript).getHeight() / 2);
             }
         }
         previousIndexOfChild = indexOfChild;
@@ -459,11 +460,11 @@ public class TourActivity extends Activity {
 
     public static double[][][] getPolygons(Context c){
         BufferedReader bufferedReader = null;
-        ArrayList<ArrayList<double[]>> temp = new ArrayList<ArrayList<double[]>>();
+        ArrayList<ArrayList<double[]>> temp = new ArrayList<>();
         for(int cnt = 0; cnt < NUMBER_OF_ZONES; cnt++){
             try {
                 temp.add(new ArrayList<double[]>());
-                bufferedReader = new BufferedReader(new InputStreamReader(c.getAssets().open("zone_" + cnt + ".txt")));
+                bufferedReader = new BufferedReader(new InputStreamReader(c.getAssets().open(String.format("zone_%d.txt", cnt))));
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {
                     String[] splitLine = line.split(",");
@@ -477,7 +478,7 @@ public class TourActivity extends Activity {
                     try {
                         bufferedReader.close();
                     } catch (IOException e) {
-
+                        Log.e("mylogs","Buffered Reader Broken");
                     }
                 }
             }
@@ -497,24 +498,24 @@ public class TourActivity extends Activity {
 
     public void scheduleTranscriptTimerTask(){
         if(!transcriptTimerTaskScheduled) {
-            transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, 250);
+            transcriptTimer.scheduleAtFixedRate(transcriptTimerTask, 0, TRANSCRIPT_UPDATE_INTERVAL);
         }
         transcriptTimerTaskScheduled = true;
     }
 
     public void configureSeekBar(){
-        maxProgressTextView.setText(formatFromMilliseconds(musicService.getAudioLength()));
+        maxProgressTextView.setText(formatMMSSFromMilliseconds(musicService.getAudioLength()));
         audioSeekBar.setProgress(0);
         audioSeekBar.setMax(musicService.getAudioLength());
         currentProgressTextView.setText(R.string.defaultProgress);
     }
 
     public void updateSeekBar(){
-        currentProgressTextView.setText(formatFromMilliseconds(musicService.getCurrentPosition()));
+        currentProgressTextView.setText(formatMMSSFromMilliseconds(musicService.getCurrentPosition()));
         audioSeekBar.setProgress(musicService.getCurrentPosition());
     }
 
-    public String formatFromMilliseconds(int milli){
+    public String formatMMSSFromMilliseconds(int milli){
         return (Math.round(milli * 0.001) / 60) + ":" + String.format("%02d",(Math.round(milli * 0.001) % 60));
     }
 
