@@ -40,7 +40,7 @@ public class TourActivity extends Activity {
     private boolean seeking = false;
     private TextView enableGPSTextView;
     private ImageButton playButton;
-    private int currentZone = -1;
+    private int currentZone = -2;
     private LinearLayout linearLayoutTranscript;
     private LocationManager locationManager;
     private MusicService musicService;
@@ -86,10 +86,10 @@ public class TourActivity extends Activity {
                 if(location.getAccuracy() < 100){
                     int zone = getZone(location.getLatitude(), location.getLongitude(), getPolygons(TourActivity.this));
                     //if entered a different zone...
-                    if(currentZone != zone && zone != -1){
+                    if(currentZone != zone && zone != -2){
                         //if audio is not playing already...
                         if(serviceBound && !musicService.isPlaying()){
-                            updateTour(zone);
+                            updateTour(zone, true);
                         }
                         currentZone = zone;
                     }
@@ -103,9 +103,7 @@ public class TourActivity extends Activity {
             @Override
             public void onProviderEnabled(String provider) {
                 enableGPSTextView.setVisibility(View.INVISIBLE);
-                if (!introPlayed()) {
-                    playIntro();
-                }
+                updateTour(-1, false);
                 Toast.makeText(TourActivity.this, "on", Toast.LENGTH_SHORT).show();
                 Log.e("mylogs","GPS Turned ON");
             }
@@ -243,10 +241,14 @@ public class TourActivity extends Activity {
         startActivity(intent);
     }
 
-    public void updateTour(int zone){
-        setUpDisplayAndAudio(zone);
+    public void updateTour(int zone, boolean displayIfAlreadyVisited){
         if(!audioZoneVisited(zone)){
+            setUpDisplayAndAudio(zone);
             playCurrentAudio();
+        } else {
+            if(displayIfAlreadyVisited) {
+                setUpDisplayAndAudio(zone);
+            }
         }
     }
 
@@ -271,11 +273,13 @@ public class TourActivity extends Activity {
                 return cnt;
             }
         }
-        return -1;
+        return -2;
     }
 
     public int getResidFromZone(int zone) {
         switch(zone){
+            case -1:
+                return R.raw.intro;
             case 0:
                 return R.raw.greyarea;
             case 1:
@@ -289,6 +293,8 @@ public class TourActivity extends Activity {
 
     public String getFilenameFromZone(int zone) {
         switch(zone){
+            case -1:
+                return "transcript_intro.txt";
             case 0:
                 return "transcript_0.txt";
             case 1:
@@ -421,9 +427,7 @@ public class TourActivity extends Activity {
                 MusicService.LocalBinder localBinder = (MusicService.LocalBinder) service;
                 musicService = localBinder.getServiceInstance();
                 serviceBound = true;
-                if (!introPlayed()) {
-                    playIntro();
-                }
+                updateTour(-1, false);
                 Log.e("mylogs", "------Service Connected");
             }
 
@@ -489,30 +493,6 @@ public class TourActivity extends Activity {
         }
 
         return finalPolygons;
-    }
-
-    public void playIntro(){
-        //if not already heard
-        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            if (serviceBound) {
-               if (musicService.isPlaying()) {
-                    Log.e("mylogs", "something be wrong");
-                } else {
-                   populateLinearLayoutTranscript(getTranscriptFromTextFile("transcript_intro.txt"));
-                   musicService.setAudio(getApplicationContext(), R.raw.intro);
-                   previousIndexOfChild = 0;
-                   configureSeekBar();
-                   musicService.playAudio();
-                   setPlayButtonToPause();
-                   scheduleTranscriptTimerTask();
-                   getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit().putBoolean("introPlayed", true).commit();
-                }
-            }
-        }
-    }
-
-    public boolean introPlayed(){
-        return getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("introPlayed", false);
     }
 
     public void scheduleTranscriptTimerTask(){
