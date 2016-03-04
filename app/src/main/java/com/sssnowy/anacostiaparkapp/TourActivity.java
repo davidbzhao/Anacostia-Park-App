@@ -121,6 +121,7 @@ public class TourActivity extends Activity {
                     if(currentZone != zone && zone != -2){
                         //if audio is not playing already...
                         if(serviceBound && !musicService.isPlaying()){
+                            Toast.makeText(TourActivity.this, String.format("Zone %d", zone), Toast.LENGTH_SHORT).show();
                             updateTour(zone, true);
                         }
                         currentZone = zone;
@@ -136,14 +137,12 @@ public class TourActivity extends Activity {
             public void onProviderEnabled(String provider) {
                 enableGPSTextView.setVisibility(View.INVISIBLE);
                 updateTour(-1, false);
-                Toast.makeText(TourActivity.this, "on", Toast.LENGTH_SHORT).show();
                 Log.e("UserAction","GPS Turned ON");
             }
 
             @Override
             public void onProviderDisabled(String provider) {
                 enableGPSTextView.setVisibility(View.VISIBLE);
-                Toast.makeText(TourActivity.this, "off", Toast.LENGTH_SHORT).show();
                 Log.e("UserAction", "GPS Turned OFF");
             }
         };
@@ -151,7 +150,7 @@ public class TourActivity extends Activity {
         if (checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5, 10, locationListener);
         } else {
-            Toast.makeText(TourActivity.this, "Permission Not Granted", Toast.LENGTH_SHORT).show();
+            Log.e("mylogs", "permission Not Granted");
         }
     }
 
@@ -274,7 +273,6 @@ public class TourActivity extends Activity {
     public int getZone(double latitude, double longitude, double[][][] polygons) {
         for (int cnt = 0; cnt < polygons.length; cnt++) {
             int intersections = numberOfLinesCrossed(latitude, longitude, polygons[cnt]);
-            Toast.makeText(TourActivity.this, intersections + "", Toast.LENGTH_SHORT).show();
             if (intersections % 2 == 1) {
                 return cnt;
             }
@@ -421,7 +419,6 @@ public class TourActivity extends Activity {
         return (new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                Toast.makeText(TourActivity.this, "Service connected", Toast.LENGTH_SHORT).show();
                 MusicService.LocalBinder localBinder = (MusicService.LocalBinder) service;
                 musicService = localBinder.getServiceInstance();
                 serviceBound = true;
@@ -431,7 +428,6 @@ public class TourActivity extends Activity {
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                Toast.makeText(TourActivity.this, "Service disconnected", Toast.LENGTH_SHORT).show();
                 musicService = null;
                 serviceBound = false;
                 Log.e("mylogs", "Service Disconnected");
