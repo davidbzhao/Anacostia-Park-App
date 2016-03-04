@@ -42,13 +42,12 @@ public class TourActivity extends Activity {
     private ImageButton playButton;
     private int currentZone = -1;
     private LinearLayout linearLayoutTranscript;
+    private LocationManager locationManager;
     private MusicService musicService;
     private ServiceConnection serviceConnection;
-    private TreeMap<Integer, String> transcript;
     private ScrollView scrollViewTranscript;
     private int scrollingInt = 0;
     private int previousIndexOfChild = 0;
-    private double[][][] polygons;
     private SeekBar audioSeekBar;
     private TextView currentProgressTextView;
     private TextView maxProgressTextView;
@@ -64,7 +63,6 @@ public class TourActivity extends Activity {
 
         Log.e("mylogs", "-onCreate");
         //initialize
-        polygons = getPolygons(TourActivity.this);
         playButton = (ImageButton) findViewById(R.id.playButton);
         enableGPSTextView = (TextView) findViewById(R.id.enableGPSTextView);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
@@ -75,48 +73,19 @@ public class TourActivity extends Activity {
 
 
         setPlayButtonToPlay();
-        if(isGPSOn()) {
+        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             enableGPSTextView.setVisibility(View.INVISIBLE);
         }
         //--------------------------------------------------------------------------------------------------------Listeners
-        /*
-        note: dropdown for zone?
 
-        If location changes,
-            If enters new zone,
-                If audio is playing,
-                    (should not happen)
-                If audio is not playing,
-                    audioProgress reset to 0
-                    populate transcript map
-                    populate linear layout
-                    play new zone audio
-                    postdelayed highlight function
-                currentZone = zone
-        If playButton is clicked,
-            If audio is not playing,
-                If transcript filled,
-                    play audio
-                    postdelayed highlight function
-            If audio is playing,
-                Audio paused
-        If new zone manually selected,
-            audioProgress reset to 0
-            populate transcript map
-            populate linear layout
-
-
-once a user manually clicks pause, automated audio tour is paused
-        */
-
-        final LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         final LocationListener locationListener = new LocationListener() {
             //If location changes,
             @Override
             public void onLocationChanged(Location location) {
                 if(location.getAccuracy() < 100) {
                     Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
-                    int zone = getZone(location.getLatitude(), location.getLongitude());
+                    int zone = getZone(location.getLatitude(), location.getLongitude(), getPolygons(TourActivity.this));
                     Log.e("mylogs", location.getLatitude() + " " + location.getLongitude() + " : " + location.getAccuracy());
                     MapActivity.updateUserLocation(location);
                     if (serviceBound) {
@@ -126,28 +95,15 @@ once a user manually clicks pause, automated audio tour is paused
                                 //If this zone has audio
                                 if (zone != -1) {
                                     //If zone not previously entered
+                                    populateLinearLayoutTranscript(getTranscriptFromTextFile(getFilenameFromZone(zone)));
+                                    musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
+                                    configureSeekBar();
+                                    previousIndexOfChild = 0;
                                     if (!audioZoneVisited(zone)) {
-                                        //If audio is not playing,
-//                                    if (musicService.getCurrentPosition() == 0) {
-                                        transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
-                                        populateLinearLayoutTranscript();
                                         //play new zone audio
-                                        musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
-                                        configureSeekBar();
                                         musicService.playAudio();
                                         scheduleTranscriptTimerTask();
                                         setPlayButtonToPause();
-                                        previousIndexOfChild = 0;
-//                                    }
-                                    } else { //SD:KF:LKJDS:LKJ:LKJDSF:LKJDSF:LKJGR:LKJGER:LKJHGERKJHGERIUHGEROIUERGOIUGEROIUHGEROIUGERGER
-                                        //If audio is not playing,
-//                                    if (musicService.getCurrentPosition() == 0) {
-                                        transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
-                                        populateLinearLayoutTranscript();
-                                        musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
-                                        configureSeekBar();
-                                        previousIndexOfChild = 0;
-//                                    }
                                     }
                                 }
                                 currentZone = zone;
@@ -186,7 +142,6 @@ once a user manually clicks pause, automated audio tour is paused
         }
 
 
-        //If play button is clicked,
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -289,37 +244,12 @@ once a user manually clicks pause, automated audio tour is paused
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        Log.e("mylogs", "--onStop");
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt("currentZone", currentZone);
-        Log.e("mylogs", "-----onSaveInstanceState");
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.e("mylogs", "---Pause");
-    }
-
-    @Override
     protected void onDestroy() {
         Log.e("mylogs", "onDestroy");
         if(serviceConnection != null){
             unbindService(serviceConnection);
         }
         super.onDestroy();
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        Log.e("mylogs", "-onRestart");
     }
 
     @Override
@@ -330,16 +260,7 @@ once a user manually clicks pause, automated audio tour is paused
         startActivity(intent);
     }
 
-    public int[] convertIntegerArrayToPrimitive(Integer[] classArray){
-        int[] primitiveArray = new int[classArray.length];
-        for(int cnt = 0; cnt < classArray.length; cnt++){
-            primitiveArray[cnt] = classArray[cnt].intValue();
-        }
-        return primitiveArray;
-    }
-
-    public int getZone(double latitude, double longitude) {
-        //TJ 38.8184974,-77.168681
+    public int getZone(double latitude, double longitude, double[][][] polygons) {
         for (int cnt = 0; cnt < polygons.length; cnt++) {
             int intersections = numberOfLinesCrossed(polygons[cnt], latitude, longitude);
             Toast.makeText(TourActivity.this, intersections + "", Toast.LENGTH_SHORT).show();
@@ -351,26 +272,28 @@ once a user manually clicks pause, automated audio tour is paused
     }
 
     public int getResidFromZone(int zone) {
-        if (zone == 0) {
-            return R.raw.greyarea;
-        } else if (zone == 1) {
-            return R.raw.empirestateofmind;
-        } else if (zone == 2) {
-            return R.raw.paradise;
-        } else {
-            return R.raw.paradise;
+        switch(zone){
+            case 0:
+                return R.raw.greyarea;
+            case 1:
+                return R.raw.empirestateofmind;
+            case 2:
+                return R.raw.paradise;
+            default:
+                return R.raw.paradise;
         }
     }
 
     public String getFilenameFromZone(int zone) {
-        if (zone == 0) {
-            return "transcript_0.txt";
-        } else if (zone == 1) {
-            return "transcript_1.txt";
-        } else if (zone == 2) {
-            return "transcript_2.txt";
-        } else {
-            return "transcript_2.txt";
+        switch(zone){
+            case 0:
+                return "transcript_0.txt";
+            case 1:
+                return "transcript_1.txt";
+            case 2:
+                return "transcript_2.txt";
+            default:
+                return "transcript_2.txt";
         }
     }
 
@@ -420,7 +343,7 @@ once a user manually clicks pause, automated audio tour is paused
         return transcript;
     }
 
-    public void populateLinearLayoutTranscript() {
+    public void populateLinearLayoutTranscript(TreeMap<Integer, String> transcript) {
         linearLayoutTranscript.removeAllViews();
         String[] transcriptArray = transcript.values().toArray(new String[transcript.size()]);
         for (int cnt = 0; cnt < transcriptArray.length; cnt++) {
@@ -433,6 +356,10 @@ once a user manually clicks pause, automated audio tour is paused
             textView.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             linearLayoutTranscript.addView(textView);
         }
+        updateTranscriptTimes(transcript);
+    }
+
+    public void updateTranscriptTimes(TreeMap<Integer, String> transcript){
         transcriptTimes = transcript.keySet().toArray(new Integer[transcript.keySet().size()]);
     }
 
@@ -561,20 +488,14 @@ once a user manually clicks pause, automated audio tour is paused
         return finalPolygons;
     }
 
-    public boolean isGPSOn(){
-        final LocationManager locationManager = (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-    }
-
     public void playIntro(){
         //if not already heard
-        if(isGPSOn()) {
+        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             if (serviceBound) {
                if (musicService.isPlaying()) {
                     Log.e("mylogs", "something be wrong");
                 } else {
-                   transcript = getTranscriptFromTextFile("transcript_intro.txt");
-                   populateLinearLayoutTranscript();
+                   populateLinearLayoutTranscript(getTranscriptFromTextFile("transcript_intro.txt"));
                    musicService.setAudio(getApplicationContext(), R.raw.intro);
                    previousIndexOfChild = 0;
                    configureSeekBar();
@@ -602,7 +523,7 @@ once a user manually clicks pause, automated audio tour is paused
         maxProgressTextView.setText(formatFromMilliseconds(musicService.getAudioLength()));
         audioSeekBar.setProgress(0);
         audioSeekBar.setMax(musicService.getAudioLength());
-        currentProgressTextView.setText("0:00");
+        currentProgressTextView.setText(R.string.defaultProgress);
     }
 
     public void updateSeekBar(){
