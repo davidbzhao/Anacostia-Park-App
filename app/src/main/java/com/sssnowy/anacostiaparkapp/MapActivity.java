@@ -97,7 +97,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         final Marker userLocation = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(0, 0))
                 .title("You Are Here!")
-                .flat(true));
+                .flat(false));
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         LocationListener locationListener = new LocationListener() {

@@ -114,18 +114,19 @@ once a user manually clicks pause, automated audio tour is paused
             //If location changes,
             @Override
             public void onLocationChanged(Location location) {
-                Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
-                int zone = getZone(location.getLatitude(), location.getLongitude());
-                Log.e("mylogs", location.getLatitude() + " " + location.getLongitude());
-                if (serviceBound) {
-                    if(!musicService.isPlaying()) {
-                        //If enters new zone,
-                        if (currentZone != zone) {
-                            //If this zone has audio
-                            if(zone != -1) {
-                                //If zone not previously entered
-                                if(!audioZoneVisited(zone)) {
-                                    //If audio is not playing,
+                if(location.getAccuracy() < 100) {
+                    Toast.makeText(TourActivity.this, "loc changed", Toast.LENGTH_SHORT).show();
+                    int zone = getZone(location.getLatitude(), location.getLongitude());
+                    Log.e("mylogs", location.getLatitude() + " " + location.getLongitude() + " : " + location.getAccuracy());
+                    if (serviceBound) {
+                        if (!musicService.isPlaying()) {
+                            //If enters new zone,
+                            if (currentZone != zone) {
+                                //If this zone has audio
+                                if (zone != -1) {
+                                    //If zone not previously entered
+                                    if (!audioZoneVisited(zone)) {
+                                        //If audio is not playing,
 //                                    if (musicService.getCurrentPosition() == 0) {
                                         transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
                                         populateLinearLayoutTranscript();
@@ -137,8 +138,8 @@ once a user manually clicks pause, automated audio tour is paused
                                         setPlayButtonToPause();
                                         previousIndexOfChild = 0;
 //                                    }
-                                } else { //SD:KF:LKJDS:LKJ:LKJDSF:LKJDSF:LKJGR:LKJGER:LKJHGERKJHGERIUHGEROIUERGOIUGEROIUHGEROIUGERGER
-                                    //If audio is not playing,
+                                    } else { //SD:KF:LKJDS:LKJ:LKJDSF:LKJDSF:LKJGR:LKJGER:LKJHGERKJHGERIUHGEROIUERGOIUGEROIUHGEROIUGERGER
+                                        //If audio is not playing,
 //                                    if (musicService.getCurrentPosition() == 0) {
                                         transcript = getTranscriptFromTextFile(getFilenameFromZone(zone));
                                         populateLinearLayoutTranscript();
@@ -146,9 +147,10 @@ once a user manually clicks pause, automated audio tour is paused
                                         configureSeekBar();
                                         previousIndexOfChild = 0;
 //                                    }
+                                    }
                                 }
+                                currentZone = zone;
                             }
-                            currentZone = zone;
                         }
                     }
                 }
