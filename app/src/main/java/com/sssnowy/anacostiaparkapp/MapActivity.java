@@ -58,9 +58,9 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         userMarker = createUserMarker();
     }
 
-    /*
-    Update the position of the User Marker.
-    Call from Tour Activity Location Changed Listener.
+    /**
+     * Update the position of the User Marker.
+     * Call from Tour Activity Location Changed Listener.
      */
     public static void updateUserLocation(Location location){
         if(userMarker != null) {
@@ -68,8 +68,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
     }
 
-    /*
-    Draw the audio zones on to the Map in the form of Google Maps Polygons.
+    /**
+     * Draw the audio zones on to the Map in the form of Google Maps Polygons.
      */
     public void drawAudioZones(double[][][] polygons){
         for(int poly = 0; poly < polygons.length; poly++){
