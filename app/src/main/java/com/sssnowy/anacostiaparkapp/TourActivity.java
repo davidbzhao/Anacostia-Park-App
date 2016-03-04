@@ -33,7 +33,7 @@ import java.util.TimerTask;
 import java.util.TreeMap;
 
 public class TourActivity extends Activity {
-    private static final int NUMBER_OF_ZONES = 3;
+    public static final int NUMBER_OF_ZONES = 3;
     public static final String SHARED_PREFERENCES = "audioZonesVisited";
     private boolean transcriptTimerTaskScheduled = false;
     private boolean serviceBound = false;
