@@ -36,25 +36,27 @@ public class TourActivity extends Activity {
     public static final int NUMBER_OF_ZONES = 3;
     public static final String SHARED_PREFERENCES = "audioZonesVisited";
     private static final int TRANSCRIPT_UPDATE_INTERVAL = 388;
+
     private boolean transcriptTimerTaskScheduled = false;
     private boolean serviceBound = false;
     private boolean seeking = false;
-    private TextView enableGPSTextView;
-    private ImageButton playButton;
     private int currentZone = -2;
+    private int previousIndexOfChild = 0;
+    private int scrollingInt = 0;
+    private Integer[] transcriptTimes;
+
+    private ImageButton playButton;
     private LinearLayout linearLayoutTranscript;
     private LocationManager locationManager;
     private MusicService musicService;
-    private ServiceConnection serviceConnection;
     private ScrollView scrollViewTranscript;
-    private int scrollingInt = 0;
-    private int previousIndexOfChild = 0;
     private SeekBar audioSeekBar;
+    private ServiceConnection serviceConnection;
     private TextView currentProgressTextView;
+    private TextView enableGPSTextView;
     private TextView maxProgressTextView;
     private Timer transcriptTimer;
     private TimerTask transcriptTimerTask;
-    private Integer[] transcriptTimes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +64,6 @@ public class TourActivity extends Activity {
         setContentView(R.layout.activity_tour);
         Log.e("mylogs", "BUILD VERSION: " + Build.VERSION.SDK_INT);
 
-        Log.e("mylogs", "-onCreate");
-        //initialize
         playButton = (ImageButton) findViewById(R.id.playButton);
         enableGPSTextView = (TextView) findViewById(R.id.enableGPSTextView);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
@@ -72,14 +72,45 @@ public class TourActivity extends Activity {
         currentProgressTextView = (TextView) findViewById(R.id.currentProgressTextView);
         maxProgressTextView = (TextView) findViewById(R.id.maxProgressTextView);
 
-
-        setPlayButtonToPlay();
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             enableGPSTextView.setVisibility(View.INVISIBLE);
         }
-        //--------------------------------------------------------------------------------------------------------Listeners
 
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        setPlayButtonToPlay();
+        setUpTimerTask();
+        setUpLocationListener();
+        setUpPlayButtonListener();
+        setUpSeekBarListener();
+        setUpScrollViewListener();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //Music Service Connection
+        Intent msIntent = new Intent(getApplicationContext(), MusicService.class);
+        serviceConnection = getServiceConnection();
+        bindService(msIntent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        if(serviceConnection != null){
+            unbindService(serviceConnection);
+        }
+        super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.e("UserAction","Back Button Pressed");
+        Intent intent = new Intent(TourActivity.this, MenuActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+    }
+
+    public void setUpLocationListener(){
         final LocationListener locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
@@ -106,24 +137,25 @@ public class TourActivity extends Activity {
                 enableGPSTextView.setVisibility(View.INVISIBLE);
                 updateTour(-1, false);
                 Toast.makeText(TourActivity.this, "on", Toast.LENGTH_SHORT).show();
-                Log.e("mylogs","GPS Turned ON");
+                Log.e("UserAction","GPS Turned ON");
             }
 
             @Override
             public void onProviderDisabled(String provider) {
                 enableGPSTextView.setVisibility(View.VISIBLE);
                 Toast.makeText(TourActivity.this, "off", Toast.LENGTH_SHORT).show();
-                Log.e("mylogs", "GPS Turned OFF");
+                Log.e("UserAction", "GPS Turned OFF");
             }
-    };
+        };
 
         if (checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5, 10, locationListener);
         } else {
-            Toast.makeText(TourActivity.this, "turn on your GPS", Toast.LENGTH_SHORT).show();
+            Toast.makeText(TourActivity.this, "Permission Not Granted", Toast.LENGTH_SHORT).show();
         }
+    }
 
-
+    public void setUpPlayButtonListener(){
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -146,26 +178,9 @@ public class TourActivity extends Activity {
                 }
             }
         });
+    }
 
-        scrollViewTranscript.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    Log.e("UserAction", "Scroll View Touched ACTION_UP");
-                    Log.e("mylogs", "ACTION_UP");
-                    scrollingInt -= 1;
-                    if (scrollingInt < 0) {
-                        Log.e("mylogs", "WOAHWOAHWOAH!!!! That ain't right");
-                    }
-                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    Log.e("UserAction", "Scroll View Touched ACTION_DOWN");
-                    Log.e("mylogs", "ACTION_DOWN");
-                    scrollingInt += 1;
-                }
-                return false;
-            }
-        });
-
+    public void setUpSeekBarListener(){
         audioSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -189,8 +204,25 @@ public class TourActivity extends Activity {
                 musicService.playAudio();
             }
         });
+    }
 
+    public void setUpScrollViewListener(){
+        scrollViewTranscript.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    Log.e("UserAction", "Scroll View Touched ACTION_UP");
+                    scrollingInt -= 1;
+                } else if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    Log.e("UserAction", "Scroll View Touched ACTION_DOWN");
+                    scrollingInt += 1;
+                }
+                return false;
+            }
+        });
+    }
 
+    public void setUpTimerTask(){
         transcriptTimer = new Timer();
         transcriptTimerTask = new TimerTask() {
             @Override
@@ -213,33 +245,6 @@ public class TourActivity extends Activity {
                 });
             }
         };
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //Music Service Connection
-        Intent msIntent = new Intent(getApplicationContext(), MusicService.class);
-        serviceConnection = getServiceConnection();
-        bindService(msIntent, serviceConnection, BIND_AUTO_CREATE);
-        Log.e("mylogs", "---onStart");
-    }
-
-    @Override
-    protected void onDestroy() {
-        Log.e("mylogs", "onDestroy");
-        if(serviceConnection != null){
-            unbindService(serviceConnection);
-        }
-        super.onDestroy();
-    }
-
-    @Override
-    public void onBackPressed() {
-        Log.e("mylogs","BACK BUTTON PRESSED");
-        Intent intent = new Intent(TourActivity.this, MenuActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-        startActivity(intent);
     }
 
     public void updateTour(int zone, boolean displayIfAlreadyVisited){
@@ -421,7 +426,7 @@ public class TourActivity extends Activity {
                 musicService = localBinder.getServiceInstance();
                 serviceBound = true;
                 updateTour(-1, false);
-                Log.e("mylogs", "------Service Connected");
+                Log.e("mylogs", "Service Connected");
             }
 
             @Override
@@ -429,7 +434,7 @@ public class TourActivity extends Activity {
                 Toast.makeText(TourActivity.this, "Service disconnected", Toast.LENGTH_SHORT).show();
                 musicService = null;
                 serviceBound = false;
-                Log.e("mylogs", "------Service Disconnected");
+                Log.e("mylogs", "Service Disconnected");
             }
         });
     }
