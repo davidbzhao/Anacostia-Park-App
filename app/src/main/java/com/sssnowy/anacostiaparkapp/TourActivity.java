@@ -1,6 +1,7 @@
 package com.sssnowy.anacostiaparkapp;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -126,6 +127,7 @@ public class TourActivity extends Activity {
                         }
                         currentZone = zone;
                     }
+                    hideProgressBar();
                 }
             }
 
@@ -136,6 +138,7 @@ public class TourActivity extends Activity {
             @Override
             public void onProviderEnabled(String provider) {
                 enableGPSTextView.setVisibility(View.INVISIBLE);
+                showProgressBar();
                 updateTour(-1, false);
                 Log.e("UserAction","GPS Turned ON");
             }
@@ -143,6 +146,7 @@ public class TourActivity extends Activity {
             @Override
             public void onProviderDisabled(String provider) {
                 enableGPSTextView.setVisibility(View.VISIBLE);
+                hideProgressBar();
                 Log.e("UserAction", "GPS Turned OFF");
             }
         };
@@ -247,6 +251,9 @@ public class TourActivity extends Activity {
     }
 
     public void updateTour(int zone, boolean displayIfAlreadyVisited){
+        if(displayIfAlreadyVisited) {
+            hideProgressBar();
+        }
         if(!audioZoneVisited(zone)){
             setUpDisplayAndAudio(zone);
             playCurrentAudio();
@@ -499,5 +506,15 @@ public class TourActivity extends Activity {
     public boolean audioZoneVisited(int zone){
         SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean("resid" + getResidFromZone(zone), false);
+    }
+
+    public void showProgressBar(){
+        Log.e("mylogs","Show Progress Bar");
+        findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+    }
+
+    public void hideProgressBar(){
+        Log.e("mylogs","Hide Progress Bar");
+        findViewById(R.id.progressBar).setVisibility(View.GONE);
     }
 }

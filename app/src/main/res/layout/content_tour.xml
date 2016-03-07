@@ -37,7 +37,8 @@
         android:text="Enable GPS to Activate Audio Tour"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
-        android:textColor="@color/colorAccent"/>
+        android:textColor="@color/colorAccent"
+        android:background="#EEE" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -83,5 +84,14 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:scaleType="fitXY"/>
+
+    <ProgressBar
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBar"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:indeterminate="true"
+        android:visibility="gone"/>
 
 </RelativeLayout>
