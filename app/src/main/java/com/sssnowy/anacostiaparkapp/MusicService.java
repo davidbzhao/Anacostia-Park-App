@@ -38,6 +38,7 @@ public class MusicService extends Service {
     public void setAudio(Context c, final int resid){
         mp.reset();
         mp = MediaPlayer.create(c, resid);
+        mp.seekTo(0);
         mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {

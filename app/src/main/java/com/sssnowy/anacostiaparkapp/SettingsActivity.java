@@ -16,6 +16,7 @@ public class SettingsActivity extends Activity {
             @Override
             public void onClick(View v) {
                 getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE).edit().clear().apply();
+                TourActivity.currentZone = -2;
             }
         });
     }
