@@ -117,6 +117,11 @@ public class TourActivity extends Activity {
             public void onLocationChanged(Location location) {
                 //If location legitimately changes...
                 if(location.getAccuracy() < 100){
+                    Toast.makeText(TourActivity.this, "Location Changed", Toast.LENGTH_SHORT).show();
+                    SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
+                    editor.putFloat("lastLatitude", (float)location.getLatitude()).putFloat("lastLongitude", (float)location.getLongitude()).apply();
+                    MapActivity.updateUserLocation(location);
+                    MapActivity.setUserCircleRadius(location.getAccuracy());
                     int zone = getZone(location.getLatitude(), location.getLongitude(), getPolygons(TourActivity.this));
                     //if entered a different zone...
                     if(currentZone != zone && zone != -2){
@@ -152,7 +157,7 @@ public class TourActivity extends Activity {
         };
 
         if (checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION") == PackageManager.PERMISSION_GRANTED) {
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5, 10, locationListener);
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5, 1, locationListener);
         } else {
             Log.e("mylogs", "permission Not Granted");
         }
@@ -287,7 +292,7 @@ public class TourActivity extends Activity {
         return -2;
     }
 
-    public int getResidFromZone(int zone) {
+    public static int getResidFromZone(int zone) {
         switch(zone){
             case -1:
                 return R.raw.intro;

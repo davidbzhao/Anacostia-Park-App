@@ -1,6 +1,7 @@
 package com.sssnowy.anacostiaparkapp;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -15,6 +16,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -28,6 +31,7 @@ import java.util.ArrayList;
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private static Marker userMarker;
+    private static Circle userCircle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +60,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         drawAudioZones(TourActivity.getPolygons(MapActivity.this));
         userMarker = createUserMarker();
+        userCircle = createUserCircle();
+        setUserMarkerToPreviousLocation();
     }
 
     /**
@@ -65,6 +71,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public static void updateUserLocation(Location location){
         if(userMarker != null) {
             userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
+        }
+        if(userCircle != null){
+            userCircle.setCenter(new LatLng(location.getLatitude(), location.getLongitude()));
+        }
+    }
+
+    public static void setUserCircleRadius(float radius) {
+        if(userCircle != null) {
+            userCircle.setRadius((double) radius);
         }
     }
 
@@ -77,10 +92,18 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             for(int point = 0; point < polygons[poly].length; point++){
                 coords[point] = new LatLng(polygons[poly][point][0], polygons[poly][point][1]);
             }
-            mMap.addPolygon(new PolygonOptions().add(coords)
-                    .strokeColor(ContextCompat.getColor(this, R.color.zoneBorder))
-                    .strokeWidth(4f)
-                    .fillColor(ContextCompat.getColor(this, R.color.zoneFill)));
+            boolean audioZoneVisited = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("resid" + TourActivity.getResidFromZone(poly), false);
+            if(audioZoneVisited){
+                mMap.addPolygon(new PolygonOptions().add(coords)
+                        .strokeColor(ContextCompat.getColor(this, R.color.zoneBorderVisited))
+                        .strokeWidth(4f)
+                        .fillColor(ContextCompat.getColor(this, R.color.zoneFillVisited)));
+            } else {
+                mMap.addPolygon(new PolygonOptions().add(coords)
+                        .strokeColor(ContextCompat.getColor(this, R.color.zoneBorder))
+                        .strokeWidth(4f)
+                        .fillColor(ContextCompat.getColor(this, R.color.zoneFill)));
+            }
         }
     }
 
@@ -89,5 +112,21 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 .position(new LatLng(0, 0))
                 .title("You Are Here!")
                 .flat(false));
+    }
+
+    public Circle createUserCircle(){
+        return mMap.addCircle(new CircleOptions()
+                .center(userMarker.getPosition())
+                .strokeColor(ContextCompat.getColor(this, R.color.circleBorder))
+                .fillColor(ContextCompat.getColor(this, R.color.circleFill))
+                .radius(0));
+    }
+
+    public void setUserMarkerToPreviousLocation(){
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        double lastLatitude = sharedPreferences.getFloat("lastLatitude", 0.0f);
+        double lastLongitude = sharedPreferences.getFloat("lastLongitude", 0.0f);
+        Log.e("mylogs", lastLatitude + " : " + lastLongitude);
+        userMarker.setPosition(new LatLng(lastLatitude, lastLongitude));
     }
 }

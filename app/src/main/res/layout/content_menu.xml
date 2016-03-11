@@ -85,7 +85,7 @@
 
             <ImageButton
                 android:text="B6"
-                android:id="@+id/button6"
+                android:id="@+id/settingsButton"
                 android:src="@drawable/abc_ic_menu_share_mtrl_alpha"
                 style="@style/MenuButton"
                 android:background="@drawable/menu_button" />

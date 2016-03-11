@@ -4,4 +4,5 @@
     <string name="title_activity_tour">TourActivity</string>
     <string name="title_activity_map">Map</string>
     <string name="defaultProgress">0:00</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 </resources>

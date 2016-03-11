@@ -7,6 +7,10 @@
 
     <color name="zoneBorder">#4CAF50</color>
     <color name="zoneFill">#454CAF50</color>
+    <color name="circleBorder">#FF1744</color>
+    <color name="circleFill">#45FF1744</color>
+    <color name="zoneBorderVisited">#9E9E9E</color>
+    <color name="zoneFillVisited">#459E9E9E</color>
 
 
     <!--<color name="aws_colorPrimary">#6FA542</color>-->
