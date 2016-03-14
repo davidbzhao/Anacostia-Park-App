@@ -214,10 +214,11 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
             int zone = getZone(location.getLatitude(), location.getLongitude(), getPolygons(TourActivity.this));
             Toast.makeText(TourActivity.this, currentZone + "/" + zone, Toast.LENGTH_SHORT).show();
             //if entered a different zone...
-            if(zone != -2){
+            if(zone != -2 && currentZone != zone){
                 //if audio is not playing already...
                 if (serviceBound && !musicService.isPlaying()) {
                     Log.e("mylogs","Service Bound and Not Playing Music === " + musicService.getAudioLength());
+                    //if audio is not loaded, finished, or not started
                     if(musicService.getCurrentPosition() == 0 || musicService.getAudioLength() == 0) {
                         Log.e("mylogs","Position = 0");
                         currentZone = zone;
