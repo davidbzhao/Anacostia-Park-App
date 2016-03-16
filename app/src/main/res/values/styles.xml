@@ -20,4 +20,30 @@
         <item name="android:tint">@color/colorPrimary</item>
     </style>
 
+    <style name="menuButtonImageButton" parent="MenuButton">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_centerHorizontal">true</item>
+        <item name="android:background">#0000</item>
+    </style>
+
+    <style name="menuButtonTextView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#FFF</item>
+        <item name="android:layout_gravity">center_horizontal|bottom</item>
+        <item name="android:padding">4dp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:background">@color/colorPrimary</item>
+    </style>
+
+    <style name="menuButtonCardView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_marginTop">@dimen/menu_button_margin</item>
+        <item name="android:layout_marginLeft">@dimen/menu_button_margin</item>
+        <item name="android:layout_weight">1</item>
+    </style>
+
 </resources>

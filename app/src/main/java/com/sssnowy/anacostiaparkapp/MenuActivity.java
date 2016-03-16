@@ -37,7 +37,7 @@ public class MenuActivity extends Activity {
 //            }
 //        });
 
-        ImageButton tourButton = (ImageButton)findViewById(R.id.button1);
+        ImageButton tourButton = (ImageButton)findViewById(R.id.tourButton);
         tourButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -48,7 +48,7 @@ public class MenuActivity extends Activity {
             }
         });
 
-        ImageButton mapButton = (ImageButton)findViewById(R.id.button2);
+        ImageButton mapButton = (ImageButton)findViewById(R.id.mapButton);
         mapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
