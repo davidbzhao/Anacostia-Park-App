@@ -1,5 +1,6 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -25,6 +26,7 @@ import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,6 +43,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
@@ -70,7 +73,6 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
     private SeekBar audioSeekBar;
     private ServiceConnection serviceConnection;
     private TextView currentProgressTextView;
-    private TextView enableGPSTextView;
     private TextView maxProgressTextView;
     private Timer transcriptTimer;
     private TimerTask transcriptTimerTask;
@@ -84,7 +86,6 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         currentZone = -2;
 
         playButton = (ImageButton) findViewById(R.id.playButton);
-        enableGPSTextView = (TextView) findViewById(R.id.enableGPSTextView);
         linearLayoutTranscript = (LinearLayout) findViewById(R.id.linearLayoutTranscript);
         scrollViewTranscript = (ScrollView) findViewById(R.id.scrollViewTranscript);
         audioSeekBar = (SeekBar) findViewById(R.id.audioSeekBar);
@@ -92,13 +93,13 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         maxProgressTextView = (TextView) findViewById(R.id.maxProgressTextView);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if(locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            enableGPSTextView.setVisibility(View.INVISIBLE);
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            hideEnableGPSTextView();
         }
         playButton.setBackgroundResource(R.drawable.play_colored);
 
-        if(!isGooglePlayServicesAvailable()){
-            Log.e("mylogs","Wait why?");
+        if (!isGooglePlayServicesAvailable()) {
+            Log.e("mylogs", "Wait why?");
             finish();
         }
 
@@ -116,6 +117,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         setUpPlayButtonListener();
         setUpSeekBarListener();
         setUpScrollViewListener();
+        setUpLocationListener();
     }
 
     @Override
@@ -139,7 +141,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
     @Override
     protected void onResume() {
         super.onResume();
-        if(googleApiClient.isConnected()){
+        if (googleApiClient.isConnected()) {
             PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
                     googleApiClient,
                     locationRequest,
@@ -156,7 +158,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
 
     @Override
     protected void onDestroy() {
-        if(serviceConnection != null){
+        if (serviceConnection != null) {
             unbindService(serviceConnection);
         }
         super.onDestroy();
@@ -164,7 +166,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
 
     @Override
     public void onBackPressed() {
-        Log.e("UserAction","Back Button Pressed");
+        Log.e("UserAction", "Back Button Pressed");
         Intent intent = new Intent(TourActivity.this, MenuActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
@@ -190,9 +192,9 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         Log.e("mylogs", "API Connection Failed");
     }
 
-    public boolean isGooglePlayServicesAvailable(){
+    public boolean isGooglePlayServicesAvailable() {
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if(status == ConnectionResult.SUCCESS){
+        if (status == ConnectionResult.SUCCESS) {
             return true;
         } else {
             GooglePlayServicesUtil.getErrorDialog(status, this, 0).show();
@@ -206,21 +208,21 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         lastLocationUpdateTime = DateFormat.getTimeInstance().format(new Date());
         Log.e("mylogs", lastLocationUpdateTime + " === Location Changed === " + location.getAccuracy());
         //If location legitimately changes...
-        if(location.getAccuracy() < 100){
+        if (location.getAccuracy() < 100) {
             SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
-            editor.putFloat("lastLatitude", (float)location.getLatitude()).putFloat("lastLongitude", (float)location.getLongitude()).apply();
+            editor.putFloat("lastLatitude", (float) location.getLatitude()).putFloat("lastLongitude", (float) location.getLongitude()).apply();
             MapActivity.updateUserLocation(location);
             MapActivity.setUserCircleRadius(location.getAccuracy());
             int zone = getZone(location.getLatitude(), location.getLongitude(), getPolygons(TourActivity.this));
             Toast.makeText(TourActivity.this, currentZone + "/" + zone, Toast.LENGTH_SHORT).show();
             //if entered a different zone...
-            if(zone != -2 && currentZone != zone){
+            if (zone != -2 && currentZone != zone) {
                 //if audio is not playing already...
                 if (serviceBound && !musicService.isPlaying()) {
-                    Log.e("mylogs","Service Bound and Not Playing Music === " + musicService.getAudioLength());
+                    Log.e("mylogs", "Service Bound and Not Playing Music === " + musicService.getAudioLength());
                     //if audio is not loaded, finished, or not started
-                    if(musicService.getCurrentPosition() == 0 || musicService.getAudioLength() == 0) {
-                        Log.e("mylogs","Position = 0");
+                    if (musicService.getCurrentPosition() == 0 || musicService.getAudioLength() == 0) {
+                        Log.e("mylogs", "Position = 0");
                         currentZone = zone;
                         Toast.makeText(TourActivity.this, String.format("Zone %d", zone), Toast.LENGTH_SHORT).show();
                         updateTour(zone, true);
@@ -229,6 +231,43 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
             }
             hideProgressBar();
         }
+    }
+
+    public void setUpLocationListener() {
+        if (getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, "com.sssnowy.anacostiaparkapp") != PackageManager.PERMISSION_GRANTED &&
+                getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, "com.sssnowy.anacostiaparkapp") != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for Activity#requestPermissions for more details.
+            return;
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 100000, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                hideEnableGPSTextView();
+                showProgressBar();
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                showEnableGPSTextView();
+                hideProgressBar();
+            }
+        });
     }
 
     public void setUpPlayButtonListener(){
@@ -262,6 +301,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 if (fromUser) {
                     musicService.seekTo(progress);
+                    currentProgressTextView.setText(formatMMSSFromMilliseconds(progress));
                     Log.e("UserAction", "Seek Bar Touched");
                 }
             }
@@ -339,6 +379,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
     }
 
     public void setUpDisplayAndAudio(int zone){
+        hideProgressBar();
         populateLinearLayoutTranscript(getTranscriptFromTextFile(getFilenameFromZone(zone)));
         musicService.setAudio(getApplicationContext(), getResidFromZone(zone));
         configureSeekBar();
@@ -574,7 +615,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
     }
 
     public String formatMMSSFromMilliseconds(int milli){
-        return (Math.round(milli * 0.001) / 60) + ":" + String.format("%02d",(Math.round(milli * 0.001) % 60));
+        return (Math.round(milli * 0.001) / 60) + ":" + String.format("%02d",((int)Math.floor(milli * 0.001) % 60));
     }
 
     public boolean audioZoneVisited(int zone){
@@ -590,5 +631,15 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
     public void hideProgressBar(){
         Log.e("mylogs","Hide Progress Bar");
         findViewById(R.id.progressBar).setVisibility(View.GONE);
+    }
+
+    public void showEnableGPSTextView(){
+        Log.e("mylogs","Show GPS Text");
+        findViewById(R.id.enableGPSTextView).setVisibility(View.VISIBLE);
+    }
+
+    public void hideEnableGPSTextView(){
+        Log.e("mylogs","Hide GPS Text");
+        findViewById(R.id.enableGPSTextView).setVisibility(View.GONE);
     }
 }
