@@ -3,6 +3,7 @@ package com.sssnowy.anacostiaparkapp;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -47,31 +48,34 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class TourActivity extends Activity implements com.google.android.gms.location.LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class TourActivity extends Activity {//implements com.google.android.gms.location.LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     public static final int NUMBER_OF_ZONES = 3;
     public static final String SHARED_PREFERENCES = "audioZonesVisited";
     private static final int TRANSCRIPT_UPDATE_INTERVAL = 388;
 
     private boolean transcriptTimerTaskScheduled = false;
-    private boolean serviceBound = false;
+    private boolean musicServiceBound = false;
+    private boolean locationServiceBound = false;
     private boolean seeking = false;
     public static int currentZone;
     private int previousIndexOfChild = 0;
     private int scrollingInt = 0;
     private Integer[] transcriptTimes;
 
-    private Location currentLocation;
-    private String lastLocationUpdateTime;
-    private GoogleApiClient googleApiClient;
-    private LocationRequest locationRequest;
+//    private Location currentLocation;
+//    private String lastLocationUpdateTime;
+//    private GoogleApiClient googleApiClient;
+//    private LocationRequest locationRequest;
 
     private ImageButton playButton;
     private LinearLayout linearLayoutTranscript;
     private LocationManager locationManager;
     private MusicService musicService;
+    private LocationService locationService;
     private ScrollView scrollViewTranscript;
     private SeekBar audioSeekBar;
-    private ServiceConnection serviceConnection;
+    private ServiceConnection musicServiceConnection;
+    private ServiceConnection locationServiceConnection;
     private TextView currentProgressTextView;
     private TextView maxProgressTextView;
     private Timer transcriptTimer;
@@ -99,26 +103,26 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         playButton.setBackgroundResource(R.drawable.ic_play_circle_outline_black_36dp);
         playButton.setTag("play");
 
-        if (!isGooglePlayServicesAvailable()) {
-            Log.e("mylogs", "Wait why?");
-            finish();
-        }
-
-        googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-        locationRequest = new LocationRequest();
-        locationRequest.setInterval(10000);
-        locationRequest.setFastestInterval(5000);
-        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+//        if (!isGooglePlayServicesAvailable()) {
+//            Log.e("mylogs", "Wait why?");
+//            finish();
+//        }
+//
+//        googleApiClient = new GoogleApiClient.Builder(this)
+//                .addApi(LocationServices.API)
+//                .addConnectionCallbacks(this)
+//                .addOnConnectionFailedListener(this)
+//                .build();
+//        locationRequest = new LocationRequest();
+//        locationRequest.setInterval(10000);
+//        locationRequest.setFastestInterval(5000);
+//        locationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
         setUpTimerTask();
         setUpPlayButtonListener();
         setUpSeekBarListener();
         setUpScrollViewListener();
-        setUpLocationListener();
+//        setUpLocationListener();
     }
 
     @Override
@@ -126,41 +130,50 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         super.onStart();
         //Music Service Connection
         Intent msIntent = new Intent(getApplicationContext(), MusicService.class);
-        serviceConnection = getServiceConnection();
-        bindService(msIntent, serviceConnection, BIND_AUTO_CREATE);
+        musicServiceConnection = getMusicServiceConnection();
+        bindService(msIntent, musicServiceConnection, BIND_AUTO_CREATE);
         //connect location services
-        googleApiClient.connect();
+        Intent mslocIntent = new Intent(getApplicationContext(), LocationService.class);
+        locationServiceConnection = getLocationServiceConnection();
+        bindService(mslocIntent, locationServiceConnection, BIND_AUTO_CREATE);
+//        googleApiClient.connect();
+//        locationService.googleApiClientConnect();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         //disconnect location services
-        googleApiClient.disconnect();
+//        googleApiClient.disconnect();
+        locationService.googleApiClientDisconnect();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (googleApiClient.isConnected()) {
-            PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
-                    googleApiClient,
-                    locationRequest,
-                    this
-            );
+        if(locationService != null) {
+            locationService.requestLocationUpdates();
         }
+//        if (googleApiClient.isConnected()) {
+//            PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
+//                    googleApiClient,
+//                    locationRequest,
+//                    this
+//            );
+//        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+//        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        locationService.removeLocationUpdates();
     }
 
     @Override
     protected void onDestroy() {
-        if (serviceConnection != null) {
-            unbindService(serviceConnection);
+        if (musicServiceConnection != null) {
+            unbindService(musicServiceConnection);
         }
         super.onDestroy();
     }
@@ -173,103 +186,103 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         startActivity(intent);
     }
 
-    @Override
-    public void onConnected(Bundle bundle) {
-        Log.e("mylogs", "API Connected");
-        PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
-                googleApiClient,
-                locationRequest,
-                this
-        );
-    }
+//    @Override
+//    public void onConnected(Bundle bundle) {
+//        Log.e("mylogs", "API Connected");
+//        PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
+//                googleApiClient,
+//                locationRequest,
+//                this
+//        );
+//    }
+//
+//    @Override
+//    public void onConnectionSuspended(int i) {
+//        Log.e("mylogs", "API Connection Suspended");
+//    }
+//
+//    @Override
+//    public void onConnectionFailed(ConnectionResult connectionResult) {
+//        Log.e("mylogs", "API Connection Failed");
+//    }
+//
+//    public boolean isGooglePlayServicesAvailable() {
+//        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+//        if (status == ConnectionResult.SUCCESS) {
+//            return true;
+//        } else {
+//            GooglePlayServicesUtil.getErrorDialog(status, this, 0).show();
+//            return false;
+//        }
+//    }
+//
+//    @Override
+//    public void onLocationChanged(Location location) {
+//        currentLocation = location;
+//        lastLocationUpdateTime = DateFormat.getTimeInstance().format(new Date());
+//        Log.e("mylogs", lastLocationUpdateTime + " === Location Changed === " + location.getAccuracy());
+//        //If location legitimately changes...
+//        if (location.getAccuracy() < 100) {
+//            SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
+//            editor.putFloat("lastLatitude", (float) location.getLatitude()).putFloat("lastLongitude", (float) location.getLongitude()).apply();
+//            MapActivity.updateUserLocation(location);
+//            MapActivity.setUserCircleRadius(location.getAccuracy());
+//            int zone = getZone(location.getLatitude(), location.getLongitude(), getPolygons(TourActivity.this));
+//            Toast.makeText(TourActivity.this, currentZone + "/" + zone, Toast.LENGTH_SHORT).show();
+//            //if entered a different zone...
+//            if (zone != -2 && currentZone != zone) {
+//                //if audio is not playing already...
+//                if (musicServiceBound && !musicService.isPlaying()) {
+//                    Log.e("mylogs", "Service Bound and Not Playing Music === " + musicService.getAudioLength());
+//                    //if audio is not loaded, finished, or not started
+//                    if (musicService.getCurrentPosition() == 0 || musicService.getAudioLength() == 0) {
+//                        Log.e("mylogs", "Position = 0");
+//                        currentZone = zone;
+//                        Toast.makeText(TourActivity.this, String.format("Zone %d", zone), Toast.LENGTH_SHORT).show();
+//                        updateTour(zone, true);
+//                    }
+//                }
+//            }
+//            hideProgressBar();
+//        }
+//    }
 
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.e("mylogs", "API Connection Suspended");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.e("mylogs", "API Connection Failed");
-    }
-
-    public boolean isGooglePlayServicesAvailable() {
-        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (status == ConnectionResult.SUCCESS) {
-            return true;
-        } else {
-            GooglePlayServicesUtil.getErrorDialog(status, this, 0).show();
-            return false;
-        }
-    }
-
-    @Override
-    public void onLocationChanged(Location location) {
-        currentLocation = location;
-        lastLocationUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        Log.e("mylogs", lastLocationUpdateTime + " === Location Changed === " + location.getAccuracy());
-        //If location legitimately changes...
-        if (location.getAccuracy() < 100) {
-            SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
-            editor.putFloat("lastLatitude", (float) location.getLatitude()).putFloat("lastLongitude", (float) location.getLongitude()).apply();
-            MapActivity.updateUserLocation(location);
-            MapActivity.setUserCircleRadius(location.getAccuracy());
-            int zone = getZone(location.getLatitude(), location.getLongitude(), getPolygons(TourActivity.this));
-            Toast.makeText(TourActivity.this, currentZone + "/" + zone, Toast.LENGTH_SHORT).show();
-            //if entered a different zone...
-            if (zone != -2 && currentZone != zone) {
-                //if audio is not playing already...
-                if (serviceBound && !musicService.isPlaying()) {
-                    Log.e("mylogs", "Service Bound and Not Playing Music === " + musicService.getAudioLength());
-                    //if audio is not loaded, finished, or not started
-                    if (musicService.getCurrentPosition() == 0 || musicService.getAudioLength() == 0) {
-                        Log.e("mylogs", "Position = 0");
-                        currentZone = zone;
-                        Toast.makeText(TourActivity.this, String.format("Zone %d", zone), Toast.LENGTH_SHORT).show();
-                        updateTour(zone, true);
-                    }
-                }
-            }
-            hideProgressBar();
-        }
-    }
-
-    public void setUpLocationListener() {
-        if (getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, "com.sssnowy.anacostiaparkapp") != PackageManager.PERMISSION_GRANTED &&
-                getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, "com.sssnowy.anacostiaparkapp") != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for Activity#requestPermissions for more details.
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 100000, new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
-
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-                hideEnableGPSTextView();
-                showProgressBar();
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-                showEnableGPSTextView();
-                hideProgressBar();
-            }
-        });
-    }
+//    public void setUpLocationListener() {
+//        if (getPackageManager().checkPermission(Manifest.permission.ACCESS_FINE_LOCATION, "com.sssnowy.anacostiaparkapp") != PackageManager.PERMISSION_GRANTED &&
+//                getPackageManager().checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION, "com.sssnowy.anacostiaparkapp") != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    public void requestPermissions(@NonNull String[] permissions, int requestCode)
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for Activity#requestPermissions for more details.
+//            return;
+//        }
+//        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100000, 100000, new LocationListener() {
+//            @Override
+//            public void onLocationChanged(Location location) {
+//
+//            }
+//
+//            @Override
+//            public void onStatusChanged(String provider, int status, Bundle extras) {
+//
+//            }
+//
+//            @Override
+//            public void onProviderEnabled(String provider) {
+//                hideEnableGPSTextView();
+//                showProgressBar();
+//            }
+//
+//            @Override
+//            public void onProviderDisabled(String provider) {
+//                showEnableGPSTextView();
+//                hideProgressBar();
+//            }
+//        });
+//    }
 
     public void setUpPlayButtonListener(){
         playButton.setOnClickListener(new View.OnClickListener() {
@@ -312,7 +325,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 seeking = true;
-                if(musicService.isPlaying()) {
+                if (musicService.isPlaying()) {
                     musicService.pauseAudio();
                 }
             }
@@ -322,7 +335,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
                 seeking = false;
                 unhighlightTranscript();
                 highlightTranscript();
-                if(playButton.getTag().toString().compareTo("pause") == 0) {
+                if (playButton.getTag().toString().compareTo("pause") == 0) {
                     musicService.playAudio();
                 }
             }
@@ -372,7 +385,7 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
     }
 
     public void updateTour(int zone, boolean displayIfAlreadyVisited){
-        Log.e("mylogs","Update Tour UI");
+        Log.e("mylogs", "Update Tour UI");
         if(displayIfAlreadyVisited) {
             hideProgressBar();
         }
@@ -546,22 +559,44 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         return transcriptTimes.length - 1;
     }
 
-    public ServiceConnection getServiceConnection() {
+    public ServiceConnection getMusicServiceConnection() {
         return (new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 MusicService.LocalBinder localBinder = (MusicService.LocalBinder) service;
                 musicService = localBinder.getServiceInstance();
-                serviceBound = true;
+                musicServiceBound = true;
                 updateTour(-1, false);
-                Log.e("mylogs", "Service Connected");
+                Log.e("mylogs", "Music Service Connected");
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 musicService = null;
-                serviceBound = false;
-                Log.e("mylogs", "Service Disconnected");
+                musicServiceBound = false;
+                Log.e("mylogs", "Music Service Disconnected");
+            }
+        });
+    }
+
+    public ServiceConnection getLocationServiceConnection() {
+        return (new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                LocationService.LocalBinder localBinder = (LocationService.LocalBinder) service;
+                locationService = localBinder.getServiceInstance();
+                locationServiceBound = true;
+                Log.e("mylogs", "Location Service Connected");
+                locationService.googleApiClientConnect();
+                locationService.requestLocationUpdates();
+                temp();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                locationService = null;
+                locationServiceBound = false;
+                Log.e("mylogs", "Location Service Disconnected");
             }
         });
     }
@@ -650,5 +685,37 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
     public void hideEnableGPSTextView(){
         Log.e("mylogs","Hide GPS Text");
         findViewById(R.id.enableGPSTextView).setVisibility(View.GONE);
+    }
+
+    public void temp(){
+        Log.e("mylogs","Temp Called");
+        Timer timer = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                Location userLocation = locationService.getUserLocation();
+                SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
+                editor.putFloat("lastLatitude", (float) userLocation.getLatitude()).putFloat("lastLongitude", (float) userLocation.getLongitude()).apply();
+                int zone = getZone(userLocation.getLatitude(), userLocation.getLongitude(), getPolygons(TourActivity.this));
+                Toast.makeText(TourActivity.this, currentZone + "/" + zone, Toast.LENGTH_SHORT).show();
+                //if entered a different zone...
+                if (zone != -2 && currentZone != zone) {
+                    //if audio is not playing already...
+                    if (musicServiceBound && !musicService.isPlaying()) {
+                        Log.e("mylogs", "Service Bound and Not Playing Music === " + musicService.getAudioLength());
+                        //if audio is not loaded, finished, or not started
+                        if (musicService.getCurrentPosition() == 0 || musicService.getAudioLength() == 0) {
+                            Log.e("mylogs", "Position = 0");
+                            currentZone = zone;
+                            Toast.makeText(TourActivity.this, String.format("Zone %d", zone), Toast.LENGTH_SHORT).show();
+                            updateTour(zone, true);
+                        }
+                    }
+                }
+                hideProgressBar();
+            }
+        };
+        timer.scheduleAtFixedRate(timerTask, 0, 10000);
+        Toast.makeText(TourActivity.this, "loc update", Toast.LENGTH_SHORT).show();
     }
 }
