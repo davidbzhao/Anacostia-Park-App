@@ -96,7 +96,8 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             hideEnableGPSTextView();
         }
-        playButton.setBackgroundResource(R.drawable.play_colored);
+        playButton.setBackgroundResource(R.drawable.ic_play_circle_outline_black_36dp);
+        playButton.setTag("play");
 
         if (!isGooglePlayServicesAvailable()) {
             Log.e("mylogs", "Wait why?");
@@ -282,14 +283,16 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
                         //play audio
                         musicService.playAudio();
                         scheduleTranscriptTimerTask();
-                        playButton.setBackgroundResource(R.drawable.pause_colored);
+                        playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_36dp);
+                        playButton.setTag("pause");
                         ((TextView) linearLayoutTranscript.getChildAt(linearLayoutTranscript.getChildCount() - 1)).setTextColor(Color.parseColor("#60000000"));
                     }
                     //If audio is playing,
                 } else {
                     //pause audio
                     musicService.pauseAudio();
-                    playButton.setBackgroundResource(R.drawable.play_colored);
+                    playButton.setBackgroundResource(R.drawable.ic_play_circle_outline_black_36dp);
+                    playButton.setTag("play");
                 }
             }
         });
@@ -309,7 +312,9 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 seeking = true;
-                musicService.pauseAudio();
+                if(musicService.isPlaying()) {
+                    musicService.pauseAudio();
+                }
             }
 
             @Override
@@ -317,7 +322,9 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
                 seeking = false;
                 unhighlightTranscript();
                 highlightTranscript();
-                musicService.playAudio();
+                if(playButton.getTag().toString().compareTo("pause") == 0) {
+                    musicService.playAudio();
+                }
             }
         });
     }
@@ -354,7 +361,8 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
                                     updateSeekBar();
                                 }
                             } else {
-                                playButton.setBackgroundResource(R.drawable.play_colored);
+                                playButton.setBackgroundResource(R.drawable.ic_play_circle_outline_black_36dp);
+                                playButton.setTag("play");
                             }
                         }
                     }
@@ -389,7 +397,8 @@ public class TourActivity extends Activity implements com.google.android.gms.loc
     public void playCurrentAudio(){
         musicService.playAudio();
         scheduleTranscriptTimerTask();
-        playButton.setBackgroundResource(R.drawable.pause_colored);
+        playButton.setBackgroundResource(R.drawable.ic_pause_circle_outline_black_36dp);
+        playButton.setTag("pause");
     }
 
     public int getZone(double latitude, double longitude, double[][][] polygons) {

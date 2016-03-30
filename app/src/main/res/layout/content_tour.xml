@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/enableGPSTextView"
-        android:text="Enable GPS to Activate Audio Tour"
+        android:text="Turn on your phone's GPS"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
         android:textColor="@color/colorAccent"
@@ -80,10 +80,11 @@
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:id="@+id/playButton"
-        android:background="@drawable/play_colored"
+        android:background="@drawable/ic_play_circle_outline_black_36dp"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:scaleType="fitXY"/>
+        android:scaleType="fitXY"
+        android:backgroundTint="@color/colorPrimary" />
 
     <ProgressBar
         android:layout_width="wrap_content"
