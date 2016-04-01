@@ -11,6 +11,7 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -40,7 +41,6 @@ public class LocationService extends Service implements com.google.android.gms.l
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        Log.e("mylogs","like wtf...it IS binded");
         googleApiClient.connect();
         return binder;
     }
@@ -104,6 +104,9 @@ public class LocationService extends Service implements com.google.android.gms.l
         //If location legitimately changes...
         if (location.getAccuracy() < 100) {
             userLocation = location;
+            Intent locIntent = new Intent(TourActivity.RECEIVE_LOCATION_UPDATE);
+            locIntent.putExtra("updateCode", 0);
+            LocalBroadcastManager.getInstance(this).sendBroadcast(locIntent);
 //            Intent locIntent = new Intent(LOCATION_BROADCAST_ACTION);
 //            locIntent.putExtra("latitude", location.getLatitude());
 //            locIntent.putExtra("longitude", location.getLongitude());

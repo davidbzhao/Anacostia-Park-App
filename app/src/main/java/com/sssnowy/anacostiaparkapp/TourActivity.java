@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,6 +18,7 @@ import android.location.LocationManager;
 import android.os.*;
 import android.os.Process;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -51,6 +53,7 @@ import com.google.android.gms.location.LocationServices;
 public class TourActivity extends Activity {//implements com.google.android.gms.location.LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     public static final int NUMBER_OF_ZONES = 3;
     public static final String SHARED_PREFERENCES = "audioZonesVisited";
+    public static final String RECEIVE_LOCATION_UPDATE = "com.sssnowy.anacostiaparkapp.RECEIVE_LOCATION_UPDATE";
     private static final int TRANSCRIPT_UPDATE_INTERVAL = 388;
 
     private boolean transcriptTimerTaskScheduled = false;
@@ -123,6 +126,7 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
         setUpSeekBarListener();
         setUpScrollViewListener();
 //        setUpLocationListener();
+        setUpBroadcastReceiver();
     }
 
     @Override
@@ -590,7 +594,7 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
                 Log.e("mylogs", "Location Service Connected");
                 locationService.googleApiClientConnect();
                 locationService.requestLocationUpdates();
-                temp();
+//                temp();
             }
 
             @Override
@@ -726,5 +730,57 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
 //        };
 //        timer.scheduleAtFixedRate(timerTask, 0, 10000);
 //        Toast.makeText(TourActivity.this, "loc update", Toast.LENGTH_SHORT).show();
+    }
+
+    public void updateLocation(Location userLocation){
+//        Location userLocation = locationService.getUserLocation();
+        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
+        editor.putFloat("lastLatitude", (float) userLocation.getLatitude()).putFloat("lastLongitude", (float) userLocation.getLongitude()).apply();
+        int zone = getZone(userLocation.getLatitude(), userLocation.getLongitude(), getPolygons(TourActivity.this));
+        Toast.makeText(TourActivity.this, currentZone + "/" + zone, Toast.LENGTH_SHORT).show();
+        //if entered a different zone...
+        if (zone != -2 && currentZone != zone) {
+            //if audio is not playing already...
+            if (musicServiceBound && !musicService.isPlaying()) {
+                Log.e("mylogs", "Service Bound and Not Playing Music === " + musicService.getAudioLength());
+                //if audio is not loaded, finished, or not started
+                if (musicService.getCurrentPosition() == 0 || musicService.getAudioLength() == 0) {
+                    Log.e("mylogs", "Position = 0");
+                    currentZone = zone;
+                    updateTour(zone, true);
+                }
+            }
+        }
+        hideProgressBar();
+    }
+
+    public void setUpBroadcastReceiver(){
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if(intent.getAction().compareTo(RECEIVE_LOCATION_UPDATE) == 0){
+                    switch(intent.getIntExtra("updateCode", -1)){
+                        case 0: //new location
+                            updateLocation(locationService.getUserLocation());
+                            Log.e("mylogs", "New Location Received");
+                            break;
+                        case 1: //location enabled
+                            Log.e("mylogs","Location Services Enabled");
+                            break;
+                        case 2: //location disabled
+                            Log.e("mylogs","Location Services Disabled");
+                            break;
+                        default:
+                            Log.e("mylogs","Received unknown");
+                            break;
+                    }
+                }
+            }
+        };
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter intentFilter = new IntentFilter(RECEIVE_LOCATION_UPDATE);
+        intentFilter.addAction(RECEIVE_LOCATION_UPDATE);
+        localBroadcastManager.registerReceiver(broadcastReceiver, intentFilter);
     }
 }
