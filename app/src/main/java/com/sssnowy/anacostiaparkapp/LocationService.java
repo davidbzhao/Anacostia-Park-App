@@ -40,8 +40,9 @@ public class LocationService extends Service implements com.google.android.gms.l
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.e("mylogs","like wtf...it IS binded");
         googleApiClient.connect();
-        return null;
+        return binder;
     }
 
     @Override
@@ -67,22 +68,19 @@ public class LocationService extends Service implements com.google.android.gms.l
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        return super.onStartCommand(intent, flags, startId);
+        return START_STICKY;
     }
 
     @Override
     public void onConnected(Bundle bundle) {
         Log.e("mylogs", "API Connected");
-        PendingResult<Status> pendingResult = LocationServices.FusedLocationApi.requestLocationUpdates(
-                googleApiClient,
-                locationRequest,
-                this
-        );
+        requestLocationUpdates();
     }
 
     @Override
     public void onConnectionSuspended(int i) {
         Log.e("mylogs", "API Connection Suspended");
+        removeLocationUpdates();
     }
 
     @Override
@@ -113,12 +111,6 @@ public class LocationService extends Service implements com.google.android.gms.l
         }
     }
 
-    public class LocalBinder extends Binder {
-        public LocationService getServiceInstance(){
-            return LocationService.this;
-        }
-    }
-
     public void googleApiClientConnect(){
         googleApiClient.connect();
     }
@@ -143,5 +135,11 @@ public class LocationService extends Service implements com.google.android.gms.l
 
     public Location getUserLocation(){
         return userLocation;
+    }
+
+    public class LocalBinder extends Binder {
+        public LocationService getServiceInstance(){
+            return LocationService.this;
+        }
     }
 }

@@ -129,15 +129,13 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
     protected void onStart() {
         super.onStart();
         //Music Service Connection
-        Intent msIntent = new Intent(getApplicationContext(), MusicService.class);
+        Intent msIntent = new Intent(this, MusicService.class);
         musicServiceConnection = getMusicServiceConnection();
         bindService(msIntent, musicServiceConnection, BIND_AUTO_CREATE);
         //connect location services
-        Intent mslocIntent = new Intent(getApplicationContext(), LocationService.class);
+        Intent mslocIntent = new Intent(this, LocationService.class);
         locationServiceConnection = getLocationServiceConnection();
         bindService(mslocIntent, locationServiceConnection, BIND_AUTO_CREATE);
-//        googleApiClient.connect();
-//        locationService.googleApiClientConnect();
     }
 
     @Override
@@ -174,6 +172,9 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
     protected void onDestroy() {
         if (musicServiceConnection != null) {
             unbindService(musicServiceConnection);
+        }
+        if (locationServiceConnection != null) {
+            unbindService(locationServiceConnection);
         }
         super.onDestroy();
     }
@@ -689,10 +690,11 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
 
     public void temp(){
         Log.e("mylogs","Temp Called");
-        Timer timer = new Timer();
-        TimerTask timerTask = new TimerTask() {
+        final Handler locHandler = new Handler();
+        locHandler.post(new Runnable() {
             @Override
             public void run() {
+                Log.e("mylogs","Location Check");
                 Location userLocation = locationService.getUserLocation();
                 SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
                 editor.putFloat("lastLatitude", (float) userLocation.getLatitude()).putFloat("lastLongitude", (float) userLocation.getLongitude()).apply();
@@ -707,15 +709,22 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
                         if (musicService.getCurrentPosition() == 0 || musicService.getAudioLength() == 0) {
                             Log.e("mylogs", "Position = 0");
                             currentZone = zone;
-                            Toast.makeText(TourActivity.this, String.format("Zone %d", zone), Toast.LENGTH_SHORT).show();
                             updateTour(zone, true);
                         }
                     }
                 }
                 hideProgressBar();
+                locHandler.postDelayed(this, 10000);
             }
-        };
-        timer.scheduleAtFixedRate(timerTask, 0, 10000);
-        Toast.makeText(TourActivity.this, "loc update", Toast.LENGTH_SHORT).show();
+        });
+//        Timer timer = new Timer();
+//        TimerTask timerTask = new TimerTask() {
+//            @Override
+//            public void run() {
+//
+//            }
+//        };
+//        timer.scheduleAtFixedRate(timerTask, 0, 10000);
+//        Toast.makeText(TourActivity.this, "loc update", Toast.LENGTH_SHORT).show();
     }
 }
