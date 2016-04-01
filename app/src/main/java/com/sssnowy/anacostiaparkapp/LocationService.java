@@ -37,6 +37,7 @@ public class LocationService extends Service implements com.google.android.gms.l
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private Location userLocation;
+    private boolean locationUpdatesRequested = false;
 
     @Nullable
     @Override
@@ -103,9 +104,15 @@ public class LocationService extends Service implements com.google.android.gms.l
         Log.e("mylogs", lastLocationUpdateTime + " === Location Changed === " + location.getAccuracy());
         //If location legitimately changes...
         if (location.getAccuracy() < 100) {
+            getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE).edit()
+                .putFloat("lastLatitude", (float) location.getLatitude())
+                .putFloat("lastLongitude", (float)location.getLongitude());
+
             userLocation = location;
             Intent locIntent = new Intent(TourActivity.RECEIVE_LOCATION_UPDATE);
             locIntent.putExtra("updateCode", 0);
+            locIntent.putExtra("latitude", userLocation.getLatitude());
+            locIntent.putExtra("longitude", userLocation.getLongitude());
             LocalBroadcastManager.getInstance(this).sendBroadcast(locIntent);
 //            Intent locIntent = new Intent(LOCATION_BROADCAST_ACTION);
 //            locIntent.putExtra("latitude", location.getLatitude());
@@ -129,11 +136,17 @@ public class LocationService extends Service implements com.google.android.gms.l
                     locationRequest,
                     this
             );
+            locationUpdatesRequested = true;
         }
     }
 
     public void removeLocationUpdates(){
         LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
+        locationUpdatesRequested = false;
+    }
+
+    public boolean isLocationUpdatesRequested(){
+        return locationUpdatesRequested;
     }
 
     public Location getUserLocation(){

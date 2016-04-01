@@ -1,14 +1,21 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -33,6 +40,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private static Marker userMarker;
     private static Circle userCircle;
 
+    private LocationService locationService;
+    private ServiceConnection locationServiceConnection;
+    private boolean locationServiceBound = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,6 +52,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        setUpBroadcastReceiver();
     }
 
 
@@ -62,6 +74,68 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         userMarker = createUserMarker();
         userCircle = createUserCircle();
         setUserMarkerToPreviousLocation();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Intent mslocIntent = new Intent(this, LocationService.class);
+        locationServiceConnection = getLocationServiceConnection();
+        bindService(mslocIntent, locationServiceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        locationService.googleApiClientDisconnect();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(locationService != null && !locationService.isLocationUpdatesRequested()) {
+            locationService.requestLocationUpdates();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        if(locationService.isLocationUpdatesRequested()) {
+            locationService.removeLocationUpdates();
+        }
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (locationServiceConnection != null) {
+            unbindService(locationServiceConnection);
+        }
+        super.onDestroy();
+    }
+
+    public ServiceConnection getLocationServiceConnection() {
+        return (new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                LocationService.LocalBinder localBinder = (LocationService.LocalBinder) service;
+                locationService = localBinder.getServiceInstance();
+                locationServiceBound = true;
+                Log.e("mylogs", "Location Service Connected");
+                locationService.googleApiClientConnect();
+                if(!locationService.isLocationUpdatesRequested()) {
+                    locationService.requestLocationUpdates();
+                }
+//                temp();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                locationService = null;
+                locationServiceBound = false;
+                Log.e("mylogs", "Location Service Disconnected");
+            }
+        });
     }
 
     /**
@@ -128,5 +202,38 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         double lastLongitude = sharedPreferences.getFloat("lastLongitude", 0.0f);
         Log.e("mylogs", lastLatitude + " : " + lastLongitude);
         userMarker.setPosition(new LatLng(lastLatitude, lastLongitude));
+    }
+
+    public void setUpBroadcastReceiver(){
+        BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if(intent.getAction().compareTo(TourActivity.RECEIVE_LOCATION_UPDATE) == 0){
+                    switch(intent.getIntExtra("updateCode", -1)){
+                        case 0: //new location
+                            Location userLocation = new Location("");
+                            userLocation.setLatitude(intent.getDoubleExtra("latitude", 0));
+                            userLocation.setLongitude(intent.getDoubleExtra("longitude", 0));
+                            updateUserLocation(userLocation);
+                            Log.e("mylogs", "New Location Received");
+                            break;
+                        case 1: //location enabled
+                            Log.e("mylogs","Location Services Enabled");
+                            break;
+                        case 2: //location disabled
+                            Log.e("mylogs","Location Services Disabled");
+                            break;
+                        default:
+                            Log.e("mylogs","Received unknown");
+                            break;
+                    }
+                }
+            }
+        };
+
+        LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
+        IntentFilter intentFilter = new IntentFilter(TourActivity.RECEIVE_LOCATION_UPDATE);
+        intentFilter.addAction(TourActivity.RECEIVE_LOCATION_UPDATE);
+        localBroadcastManager.registerReceiver(broadcastReceiver, intentFilter);
     }
 }

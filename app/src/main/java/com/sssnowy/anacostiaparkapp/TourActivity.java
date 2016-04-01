@@ -153,7 +153,7 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
     @Override
     protected void onResume() {
         super.onResume();
-        if(locationService != null) {
+        if(locationService != null && !locationService.isLocationUpdatesRequested()) {
             locationService.requestLocationUpdates();
         }
 //        if (googleApiClient.isConnected()) {
@@ -169,7 +169,9 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
     protected void onPause() {
         super.onPause();
 //        LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, this);
-        locationService.removeLocationUpdates();
+        if(locationService.isLocationUpdatesRequested()){
+            locationService.removeLocationUpdates();
+        }
     }
 
     @Override
@@ -593,7 +595,9 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
                 locationServiceBound = true;
                 Log.e("mylogs", "Location Service Connected");
                 locationService.googleApiClientConnect();
-                locationService.requestLocationUpdates();
+                if(!locationService.isLocationUpdatesRequested()) {
+                    locationService.requestLocationUpdates();
+                }
 //                temp();
             }
 
@@ -761,7 +765,10 @@ public class TourActivity extends Activity {//implements com.google.android.gms.
                 if(intent.getAction().compareTo(RECEIVE_LOCATION_UPDATE) == 0){
                     switch(intent.getIntExtra("updateCode", -1)){
                         case 0: //new location
-                            updateLocation(locationService.getUserLocation());
+                            Location userLocation = new Location("");
+                            userLocation.setLatitude(intent.getDoubleExtra("latitude", 0));
+                            userLocation.setLongitude(intent.getDoubleExtra("longitude", 0));
+                            updateLocation(userLocation);
                             Log.e("mylogs", "New Location Received");
                             break;
                         case 1: //location enabled
