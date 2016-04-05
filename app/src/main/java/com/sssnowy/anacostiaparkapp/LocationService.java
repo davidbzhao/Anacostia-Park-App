@@ -30,10 +30,7 @@ import java.util.Date;
  * Created by 2016dzhao on 3/30/2016.
  */
 public class LocationService extends Service implements com.google.android.gms.location.LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-    public final static String LOCATION_BROADCAST_ACTION = "com.sssnowy.anacostiaparkapp.BROADCAST_ACTION";
     private IBinder binder = new LocalBinder();
-    private LocationManager locationManager;
-    private LocationListener locationListener;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
     private Location userLocation;
@@ -114,10 +111,6 @@ public class LocationService extends Service implements com.google.android.gms.l
             locIntent.putExtra("latitude", userLocation.getLatitude());
             locIntent.putExtra("longitude", userLocation.getLongitude());
             LocalBroadcastManager.getInstance(this).sendBroadcast(locIntent);
-//            Intent locIntent = new Intent(LOCATION_BROADCAST_ACTION);
-//            locIntent.putExtra("latitude", location.getLatitude());
-//            locIntent.putExtra("longitude", location.getLongitude());
-//            sendBroadcast(locIntent);
         }
     }
 
