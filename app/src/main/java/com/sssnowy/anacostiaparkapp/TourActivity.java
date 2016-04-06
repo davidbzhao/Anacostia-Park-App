@@ -49,7 +49,6 @@ public class TourActivity extends Activity {
     private boolean locationServiceBound = false;
 
     //Location
-    private LocationManager locationManager;
     public static int currentZone;
 
     //Transcript
@@ -88,10 +87,6 @@ public class TourActivity extends Activity {
         skipForwardButton = (ImageButton) findViewById(R.id.skipForwardButton);
         skipBackwardButton = (ImageButton) findViewById(R.id.skipBackButton);
 
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-            hideEnableGPSTextView();
-        }
         playButton.setBackgroundResource(R.drawable.ic_play_circle_outline_black_36dp);
         playButton.setTag("play");
 
@@ -208,12 +203,12 @@ public class TourActivity extends Activity {
         skipForwardButton.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                switch(event.getAction()){
+                switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         setToAccentBackgroundTint(v);
                         break;
                     case MotionEvent.ACTION_UP:
-                        if(musicServiceBound) {
+                        if (musicServiceBound) {
                             setToPrimaryBackgroundTint(v);
                             musicService.seekTo(musicService.getAudioLength());
                             unhighlightTranscript();
@@ -516,6 +511,13 @@ public class TourActivity extends Activity {
                 if(!locationService.isLocationUpdatesRequested()) {
                     locationService.requestLocationUpdates();
                 }
+                if(locationService.isGPSOn()){
+                    hideEnableGPSTextView();
+                    showProgressBar();
+                } else {
+                    showEnableGPSTextView();
+                    hideProgressBar();
+                }
             }
 
             @Override
@@ -631,7 +633,6 @@ public class TourActivity extends Activity {
                 }
             }
         }
-        hideProgressBar();
     }
 
     public void setUpBroadcastReceiver(){
@@ -641,6 +642,7 @@ public class TourActivity extends Activity {
                 if(intent.getAction().compareTo(RECEIVE_LOCATION_UPDATE) == 0){
                     switch(intent.getIntExtra("updateCode", -1)){
                         case 0: //new location
+                            hideProgressBar();
                             Location userLocation = new Location("");
                             userLocation.setLatitude(intent.getDoubleExtra("latitude", 0));
                             userLocation.setLongitude(intent.getDoubleExtra("longitude", 0));
@@ -648,9 +650,13 @@ public class TourActivity extends Activity {
                             Log.e("mylogs", "New Location Received");
                             break;
                         case 1: //location enabled
+                            showProgressBar();
+                            hideEnableGPSTextView();
                             Log.e("mylogs","Location Services Enabled");
                             break;
                         case 2: //location disabled
+                            hideProgressBar();
+                            showEnableGPSTextView();
                             Log.e("mylogs","Location Services Disabled");
                             break;
                         default:
