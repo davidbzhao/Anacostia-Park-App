@@ -68,6 +68,8 @@ public class TourActivity extends Activity {
     private TextView currentProgressTextView;
     private TextView maxProgressTextView;
     private ImageButton playButton;
+    private ImageButton skipForwardButton;
+    private ImageButton skipBackwardButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +85,8 @@ public class TourActivity extends Activity {
         audioSeekBar = (SeekBar) findViewById(R.id.audioSeekBar);
         currentProgressTextView = (TextView) findViewById(R.id.currentProgressTextView);
         maxProgressTextView = (TextView) findViewById(R.id.maxProgressTextView);
+        skipForwardButton = (ImageButton) findViewById(R.id.skipForwardButton);
+        skipBackwardButton = (ImageButton) findViewById(R.id.skipBackButton);
 
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
@@ -93,6 +97,7 @@ public class TourActivity extends Activity {
 
         setUpTimerTask();
         setUpPlayButtonListener();
+        setUpSkipButtonsListeners();
         setUpSeekBarListener();
         setUpScrollViewListener();
         setUpBroadcastReceiver();
@@ -179,6 +184,49 @@ public class TourActivity extends Activity {
         });
     }
 
+    public void setUpSkipButtonsListeners(){
+        skipBackwardButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        setToAccentBackgroundTint(v);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if(musicServiceBound) {
+                            setToPrimaryBackgroundTint(v);
+                            musicService.seekTo(0);
+                            unhighlightTranscript();
+                            highlightTranscript();
+                            updateSeekBar();
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
+        skipForwardButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        setToAccentBackgroundTint(v);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        if(musicServiceBound) {
+                            setToPrimaryBackgroundTint(v);
+                            musicService.seekTo(musicService.getAudioLength());
+                            unhighlightTranscript();
+                            highlightTranscript();
+                            updateSeekBar();
+                        }
+                        break;
+                }
+                return false;
+            }
+        });
+    }
+
     public void setUpSeekBarListener(){
         audioSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -250,6 +298,14 @@ public class TourActivity extends Activity {
                 });
             }
         };
+    }
+
+    public void setToAccentBackgroundTint(View v){
+        v.getBackground().setTint(ContextCompat.getColor(this, R.color.colorAccent));
+    }
+
+    public void setToPrimaryBackgroundTint(View v){
+        v.getBackground().setTint(ContextCompat.getColor(this, R.color.colorPrimary));
     }
 
     public void updateTour(int zone, boolean displayIfAlreadyVisited){

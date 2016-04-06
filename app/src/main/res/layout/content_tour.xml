@@ -94,4 +94,27 @@
         android:layout_centerHorizontal="true"
         android:indeterminate="true"/>
 
+    <ImageButton
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/skipForwardButton"
+        android:scaleType="fitXY"
+        android:layout_alignParentBottom="true"
+        android:layout_toRightOf="@+id/playButton"
+        android:layout_toEndOf="@+id/playButton"
+        android:background="@drawable/ic_skip_next_black_36dp"
+        android:layout_margin="12dp"
+        android:backgroundTint="@color/colorPrimary" />
+
+    <ImageButton
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:id="@+id/skipBackButton"
+        android:scaleType="fitXY"
+        android:layout_toLeftOf="@id/playButton"
+        android:background="@drawable/ic_skip_previous_black_36dp"
+        android:layout_margin="12dp"
+        android:layout_alignParentBottom="true"
+        android:backgroundTint="@color/colorPrimary" />
+
 </RelativeLayout>
