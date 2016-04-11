@@ -197,11 +197,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     }
 
     public void setUserMarkerToPreviousLocation(){
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
-        double lastLatitude = sharedPreferences.getFloat("lastLatitude", 0.0f);
-        double lastLongitude = sharedPreferences.getFloat("lastLongitude", 0.0f);
-        Log.e("mylogs", lastLatitude + " : " + lastLongitude);
-        userMarker.setPosition(new LatLng(lastLatitude, lastLongitude));
+//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
+//        double lastLatitude = sharedPreferences.getFloat("lastLatitude", 0.0f);
+//        double lastLongitude = sharedPreferences.getFloat("lastLongitude", 0.0f);
+        Log.e("mylogs", locationService.getUserLocation().getLatitude() + " : " + locationService.getUserLocation().getLongitude());
+        userMarker.setPosition(new LatLng(locationService.getUserLocation().getLatitude(), locationService.getUserLocation().getLongitude()));
     }
 
     public void setUpBroadcastReceiver(){
