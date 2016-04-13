@@ -29,6 +29,7 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -344,7 +345,7 @@ public class TourActivity extends Activity {
         for (int cnt = 0; cnt < polygons.length(); cnt++) {
             int intersections = 0;
             try {
-                intersections = numberOfLinesCrossed(latitude, longitude, polygons.getJSONArray(cnt));
+                intersections = numberOfLinesCrossed(latitude, longitude, polygons.getJSONObject(cnt).getJSONArray("coordinates"));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -377,11 +378,11 @@ public class TourActivity extends Activity {
         return "transcript_2.txt";
     }
 
-    public int numberOfLinesCrossed(double latitude, double longitude, JSONArray polygon) throws JSONException {
+    public int numberOfLinesCrossed(double latitude, double longitude, JSONArray coordinates) throws JSONException {
         int intersections = 0;
-        for (int cnt = 0; cnt < polygon.length(); cnt++) {
-            JSONArray point1 = polygon.getJSONArray(cnt);
-            JSONArray point2 =  polygon.getJSONArray((cnt + 1) % polygon.length());
+        for (int cnt = 0; cnt < coordinates.length(); cnt++) {
+            JSONArray point1 = coordinates.getJSONArray(cnt);
+            JSONArray point2 =  coordinates.getJSONArray((cnt + 1) % coordinates.length());
             //if the latitudes are the same, aka the slope is horizontal
             if (point1.getDouble(0) == point2.getDouble(0)) {
                 continue;

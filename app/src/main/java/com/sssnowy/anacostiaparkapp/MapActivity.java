@@ -23,6 +23,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -170,9 +171,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
      */
     public void drawAudioZones(JSONArray polygons) throws JSONException {
         for(int poly = 0; poly < polygons.length(); poly++){
-            LatLng[] coords = new LatLng[polygons.getJSONArray(poly).length()];
-            for(int point = 0; point < polygons.getJSONArray(poly).length(); point++){
-                coords[point] = new LatLng(polygons.getJSONArray(poly).getJSONArray(point).getDouble(0), polygons.getJSONArray(poly).getJSONArray(point).getDouble(1));
+            LatLng[] coords = new LatLng[polygons.getJSONObject(poly).getJSONArray("coordinates").length()];
+            for(int point = 0; point < polygons.getJSONObject(poly).getJSONArray("coordinates").length(); point++){
+                coords[point] = new LatLng(polygons.getJSONObject(poly).getJSONArray("coordinates").getJSONArray(point).getDouble(0),
+                        polygons.getJSONObject(poly).getJSONArray("coordinates").getJSONArray(point).getDouble(1));
             }
             boolean audioZoneVisited = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("resid" + TourActivity.getResidFromZone(poly), false);
             if(audioZoneVisited){
@@ -186,6 +188,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         .strokeWidth(4f)
                         .fillColor(ContextCompat.getColor(this, R.color.zoneFill)));
             }
+
+            LatLng markerLocation = new LatLng(polygons.getJSONObject(poly).getJSONArray("marker-location").getDouble(0),
+                    polygons.getJSONObject(poly).getJSONArray("marker-location").getDouble(1));
+            String title = polygons.getJSONObject(poly).getString("title");
+            mMap.addMarker(new MarkerOptions().position(markerLocation)
+                        .title(title)
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
         }
     }
 
@@ -193,7 +202,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(0, 0))
                 .title("You Are Here!")
-                .flat(false));
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
     }
 
     public Circle createUserCircle(){
