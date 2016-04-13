@@ -1,5 +1,6 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -26,7 +27,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -295,10 +300,12 @@ public class TourActivity extends Activity {
         };
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void setToAccentBackgroundTint(View v){
         v.getBackground().setTint(ContextCompat.getColor(this, R.color.colorAccent));
     }
 
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public void setToPrimaryBackgroundTint(View v){
         v.getBackground().setTint(ContextCompat.getColor(this, R.color.colorPrimary));
     }
@@ -333,9 +340,14 @@ public class TourActivity extends Activity {
         playButton.setTag("pause");
     }
 
-    public int getZone(double latitude, double longitude, double[][][] polygons) {
-        for (int cnt = 0; cnt < polygons.length; cnt++) {
-            int intersections = numberOfLinesCrossed(latitude, longitude, polygons[cnt]);
+    public int getZone(double latitude, double longitude, JSONArray polygons) {
+        for (int cnt = 0; cnt < polygons.length(); cnt++) {
+            int intersections = 0;
+            try {
+                intersections = numberOfLinesCrossed(latitude, longitude, polygons.getJSONArray(cnt));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
             if (intersections % 2 == 1) {
                 return cnt;
             }
@@ -365,22 +377,22 @@ public class TourActivity extends Activity {
         return "transcript_2.txt";
     }
 
-    public int numberOfLinesCrossed(double latitude, double longitude, double[][] polygon) {
+    public int numberOfLinesCrossed(double latitude, double longitude, JSONArray polygon) throws JSONException {
         int intersections = 0;
-        for (int cnt = 0; cnt < polygon.length; cnt++) {
-            double[] point1 = polygon[cnt];
-            double[] point2 = polygon[(cnt + 1) % polygon.length];
+        for (int cnt = 0; cnt < polygon.length(); cnt++) {
+            JSONArray point1 = polygon.getJSONArray(cnt);
+            JSONArray point2 =  polygon.getJSONArray((cnt + 1) % polygon.length());
             //if the latitudes are the same, aka the slope is horizontal
-            if (point1[0] == point2[0]) {
+            if (point1.getDouble(0) == point2.getDouble(0)) {
                 continue;
             }
             //get slope & y-int of line between point1 and point2
-            double m = (point2[0] - point1[0]) / (point2[1] - point1[1]);
-            double b = point1[0] - m * point1[1];
+            double m = (point2.getDouble(0) - point1.getDouble(0)) / (point2.getDouble(1) - point1.getDouble(1));
+            double b = point1.getDouble(0) - m * point1.getDouble(1);
             //find the x value of the intersection point between the horizontal line that runs through the user location and the point1/point2 line
             double x = (1 / m) * (latitude - b);
             //if x is in the range both lines
-            if ((point1[1] - x < 0 ^ point2[1] - x < 0) && x > longitude) {
+            if ((point1.getDouble(1) - x < 0 ^ point2.getDouble(1) - x < 0) && x > longitude) {
                 intersections += 1;
             }
         }
@@ -529,42 +541,14 @@ public class TourActivity extends Activity {
         });
     }
 
-    public static double[][][] getPolygons(Context c){
-        BufferedReader bufferedReader = null;
-        ArrayList<ArrayList<double[]>> temp = new ArrayList<>();
-        for(int cnt = 0; cnt < NUMBER_OF_ZONES; cnt++){
-            try {
-                temp.add(new ArrayList<double[]>());
-                bufferedReader = new BufferedReader(new InputStreamReader(c.getAssets().open(String.format("zone_%d.txt", cnt))));
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    String[] splitLine = line.split(",");
-                    double[] coord = {Double.parseDouble(splitLine[0]), Double.parseDouble(splitLine[1])};
-                    temp.get(cnt).add(coord);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (bufferedReader != null) {
-                    try {
-                        bufferedReader.close();
-                    } catch (IOException e) {
-                        Log.e("mylogs","Buffered Reader Broken");
-                    }
-                }
-            }
+    public static JSONArray getPolygons(Context c) throws IOException, JSONException {
+        BufferedReader bufferedReader= new BufferedReader(new InputStreamReader(c.getAssets().open("zones.json")));
+        String jsonFileString = "";
+        String line;
+        while((line = bufferedReader.readLine()) != null){
+            jsonFileString += line;
         }
-
-        double[][][] finalPolygons = new double[temp.size()][][];
-        for(int cnt = 0; cnt < temp.size(); cnt++){
-            finalPolygons[cnt] = new double[temp.get(cnt).size()][2];
-            for(int z = 0; z < finalPolygons[cnt].length; z++){
-                finalPolygons[cnt][z][0] = temp.get(cnt).get(z)[0];
-                finalPolygons[cnt][z][1] = temp.get(cnt).get(z)[1];
-            }
-        }
-
-        return finalPolygons;
+        return new JSONArray(jsonFileString);
     }
 
     public void scheduleTranscriptTimerTask(){
@@ -618,7 +602,14 @@ public class TourActivity extends Activity {
     public void updateLocation(Location userLocation){
         SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
         editor.putFloat("lastLatitude", (float) userLocation.getLatitude()).putFloat("lastLongitude", (float) userLocation.getLongitude()).apply();
-        int zone = getZone(userLocation.getLatitude(), userLocation.getLongitude(), getPolygons(TourActivity.this));
+        int zone = 0;
+        try {
+            zone = getZone(userLocation.getLatitude(), userLocation.getLongitude(), getPolygons(TourActivity.this));
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Toast.makeText(TourActivity.this, currentZone + "/" + zone, Toast.LENGTH_SHORT).show();
         //if entered a different zone...
         if (zone != -2 && currentZone != zone) {

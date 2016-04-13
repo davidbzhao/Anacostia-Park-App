@@ -30,6 +30,9 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolygonOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -70,10 +73,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap = googleMap;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(38.817328, -77.169412), 15f));
 
-        drawAudioZones(TourActivity.getPolygons(MapActivity.this));
+        try {
+            drawAudioZones(TourActivity.getPolygons(MapActivity.this));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         userMarker = createUserMarker();
         userCircle = createUserCircle();
-        setUserMarkerToPreviousLocation();
     }
 
     @Override
@@ -126,7 +134,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 if(!locationService.isLocationUpdatesRequested()) {
                     locationService.requestLocationUpdates();
                 }
-//                temp();
+                setUserMarkerToPreviousLocation();
             }
 
             @Override
@@ -160,11 +168,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     /**
      * Draw the audio zones on to the Map in the form of Google Maps Polygons.
      */
-    public void drawAudioZones(double[][][] polygons){
-        for(int poly = 0; poly < polygons.length; poly++){
-            LatLng[] coords = new LatLng[polygons[poly].length];
-            for(int point = 0; point < polygons[poly].length; point++){
-                coords[point] = new LatLng(polygons[poly][point][0], polygons[poly][point][1]);
+    public void drawAudioZones(JSONArray polygons) throws JSONException {
+        for(int poly = 0; poly < polygons.length(); poly++){
+            LatLng[] coords = new LatLng[polygons.getJSONArray(poly).length()];
+            for(int point = 0; point < polygons.getJSONArray(poly).length(); point++){
+                coords[point] = new LatLng(polygons.getJSONArray(poly).getJSONArray(point).getDouble(0), polygons.getJSONArray(poly).getJSONArray(point).getDouble(1));
             }
             boolean audioZoneVisited = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("resid" + TourActivity.getResidFromZone(poly), false);
             if(audioZoneVisited){
