@@ -1,11 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_height="match_parent"
+    android:paddingTop="8dp"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.sssnowy.anacostiaparkapp.SettingsActivity"
     android:background="#FFF">
 
+    <RelativeLayout style="@style/SettingsRow"
+        android:id="@+id/relativeLayout">
+
+        <LinearLayout style="@style/SettingsTextContainer">
+
+            <TextView
+                android:text="Audio Tour"
+                android:id="@+id/textView"
+                style="@style/SettingsPrimaryText" />
+
+            <TextView
+                android:text="Reset the places you visited"
+                android:id="@+id/textView2"
+                style="@style/SettingsSecondaryText" />
+        </LinearLayout>
+    </RelativeLayout>
+    <RelativeLayout style="@style/SettingsRow"
+        android:layout_below="@+id/relativeLayout"
+        android:layout_alignLeft="@+id/relativeLayout"
+        android:layout_alignStart="@+id/relativeLayout">
+
+        <LinearLayout style="@style/SettingsTextContainer">
+
+            <TextView
+                android:text="Show audio zones on map"
+                android:id="@+id/textView3"
+                style="@style/SettingsPrimaryText" />
+
+            <TextView
+                android:text="Zones are shown on map"
+                android:id="@+id/textView4"
+                style="@style/SettingsSecondaryText" />
+        </LinearLayout>
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/checkBox"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:textColor="#000"
+            android:buttonTint="@color/colorAccent"
+            android:checked="true"/>
+    </RelativeLayout>
 </RelativeLayout>
