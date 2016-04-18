@@ -8,7 +8,7 @@
     android:background="#FFF">
 
     <RelativeLayout style="@style/SettingsRow"
-        android:id="@+id/relativeLayout">
+        android:id="@+id/resetZonesSetting">
 
         <LinearLayout style="@style/SettingsTextContainer">
 
@@ -23,10 +23,12 @@
                 style="@style/SettingsSecondaryText" />
         </LinearLayout>
     </RelativeLayout>
+
     <RelativeLayout style="@style/SettingsRow"
-        android:layout_below="@+id/relativeLayout"
-        android:layout_alignLeft="@+id/relativeLayout"
-        android:layout_alignStart="@+id/relativeLayout">
+        android:id="@+id/showZonesSetting"
+        android:layout_below="@+id/resetZonesSetting"
+        android:layout_alignLeft="@+id/resetZonesSetting"
+        android:layout_alignStart="@+id/resetZonesSetting">
 
         <LinearLayout style="@style/SettingsTextContainer">
 
@@ -36,8 +38,8 @@
                 style="@style/SettingsPrimaryText" />
 
             <TextView
-                android:text="Zones are shown on map"
-                android:id="@+id/textView4"
+                android:text="@string/audio_zones_not_visible"
+                android:id="@+id/audioZonesVisibleTextView"
                 style="@style/SettingsSecondaryText" />
         </LinearLayout>
 
@@ -49,7 +51,6 @@
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
             android:textColor="#000"
-            android:buttonTint="@color/colorAccent"
-            android:checked="true"/>
+            android:buttonTint="@color/colorAccent"/>
     </RelativeLayout>
 </RelativeLayout>

@@ -6,18 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.IBinder;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,10 +29,7 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
@@ -71,11 +63,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
+        Log.e("mylogs","map ready");
         mMap = googleMap;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(38.817328, -77.169412), 15f));
 
         try {
-            drawAudioZones(TourActivity.getPolygons(MapActivity.this));
+            if(getApplicationContext().getSharedPreferences(SettingsActivity.SETTINGS_SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("showZones", false)){
+                drawAudioZones(TourActivity.getPolygons(MapActivity.this));
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -176,7 +171,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 coords[point] = new LatLng(polygons.getJSONObject(poly).getJSONArray("coordinates").getJSONArray(point).getDouble(0),
                         polygons.getJSONObject(poly).getJSONArray("coordinates").getJSONArray(point).getDouble(1));
             }
-            boolean audioZoneVisited = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("resid" + TourActivity.getResidFromZone(poly), false);
+            boolean audioZoneVisited = getApplicationContext().getSharedPreferences(TourActivity.AUDIO_ZONES_SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("resid" + TourActivity.getResidFromZone(poly), false);
             if(audioZoneVisited){
                 mMap.addPolygon(new PolygonOptions().add(coords)
                         .strokeColor(ContextCompat.getColor(this, R.color.zoneBorderVisited))
@@ -214,7 +209,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     }
 
     public void setUserMarkerToPreviousLocation(){
-//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE);
+//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TourActivity.AUDIO_ZONES_SHARED_PREFERENCES, Context.MODE_PRIVATE);
 //        double lastLatitude = sharedPreferences.getFloat("lastLatitude", 0.0f);
 //        double lastLongitude = sharedPreferences.getFloat("lastLongitude", 0.0f);
         Log.e("mylogs", locationService.getUserLocation().getLatitude() + " : " + locationService.getUserLocation().getLongitude());

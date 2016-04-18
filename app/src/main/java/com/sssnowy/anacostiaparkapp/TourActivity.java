@@ -11,7 +11,6 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.*;
 import android.os.Process;
 import android.support.v4.content.ContextCompat;
@@ -29,20 +28,17 @@ import android.widget.Toast;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
 
 public class TourActivity extends Activity {
     public static final int NUMBER_OF_ZONES = 3;
-    public static final String SHARED_PREFERENCES = "audioZonesVisited";
+    public static final String AUDIO_ZONES_SHARED_PREFERENCES = "com.sssnowy.anacostiaparkapp.SETTINGS";
     public static final String RECEIVE_LOCATION_UPDATE = "com.sssnowy.anacostiaparkapp.RECEIVE_LOCATION_UPDATE";
     private static final int TRANSCRIPT_UPDATE_INTERVAL = 388;
 
@@ -576,7 +572,7 @@ public class TourActivity extends Activity {
     }
 
     public boolean audioZoneVisited(int zone){
-        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(AUDIO_ZONES_SHARED_PREFERENCES, Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean("resid" + getResidFromZone(zone), false);
     }
 
@@ -601,7 +597,7 @@ public class TourActivity extends Activity {
     }
 
     public void updateLocation(Location userLocation){
-        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getApplicationContext().getSharedPreferences(AUDIO_ZONES_SHARED_PREFERENCES, Context.MODE_PRIVATE).edit();
         editor.putFloat("lastLatitude", (float) userLocation.getLatitude()).putFloat("lastLongitude", (float) userLocation.getLongitude()).apply();
         int zone = 0;
         try {

@@ -4,9 +4,7 @@ import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -16,7 +14,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -108,7 +105,7 @@ public class LocationService extends Service implements com.google.android.gms.l
         Log.e("mylogs", lastLocationUpdateTime + " === Location Changed === " + location.getAccuracy());
         //If location legitimately changes...
         if (location.getAccuracy() < 100) {
-            getApplicationContext().getSharedPreferences(TourActivity.SHARED_PREFERENCES, Context.MODE_PRIVATE).edit()
+            getApplicationContext().getSharedPreferences(TourActivity.AUDIO_ZONES_SHARED_PREFERENCES, Context.MODE_PRIVATE).edit()
                     .putFloat("lastLatitude", (float) location.getLatitude())
                     .putFloat("lastLongitude", (float) location.getLongitude());
 
