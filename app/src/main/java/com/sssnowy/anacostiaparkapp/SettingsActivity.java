@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class SettingsActivity extends Activity {
     public static final String SETTINGS_SHARED_PREFERENCES = "com.sssnowy.anacostiaparkapp.SETTINGS_SHARED_PREFERENCES";
@@ -33,6 +34,7 @@ public class SettingsActivity extends Activity {
                         .clear()
                         .putBoolean("resid" + R.raw.intro, true)
                         .apply();
+                Toast.makeText(SettingsActivity.this, "Zones reset", Toast.LENGTH_SHORT).show();
             }
         });
     }
