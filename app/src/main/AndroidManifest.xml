@@ -24,7 +24,8 @@
             android:name=".TourActivity"
             android:label="@string/title_activity_tour"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme" >
+            android:theme="@style/AppTheme"
+            android:parentActivityName=".MenuActivity">
         </activity>
 
         <service
@@ -52,7 +53,8 @@
 
         <activity
             android:name=".MapActivity"
-            android:label="@string/title_activity_map" >
+            android:label="@string/title_activity_map"
+            android:parentActivityName=".MenuActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sssnowy.anacostiaparkapp.MenuActivity" />
