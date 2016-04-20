@@ -39,7 +39,7 @@
                 style="@style/menuButtonCardView"
                 android:layout_marginRight="@dimen/menu_button_margin">
                 <ImageButton
-                    android:text="Tour"
+                    android:text="Map"
                     android:src="@drawable/ic_map_black_48dp"
                     style="@style/menuButtonImageButton"
                     android:id="@+id/mapButton"/>
@@ -61,7 +61,7 @@
                 xmlns:card_view="http://schemas.android.com/apk/res-auto"
                 style="@style/menuButtonCardView">
                 <ImageButton
-                    android:text="Tour"
+                    android:text="Events"
                     android:src="@drawable/ic_event_black_48dp"
                     style="@style/menuButtonImageButton" />
                 <TextView
@@ -75,7 +75,7 @@
                 style="@style/menuButtonCardView"
                 android:layout_marginRight="@dimen/menu_button_margin">
                 <ImageButton
-                    android:text="Tour"
+                    android:text="Gallery"
                     android:src="@drawable/ic_photo_library_black_48dp"
                     style="@style/menuButtonImageButton" />
                 <TextView
@@ -97,9 +97,10 @@
                 style="@style/menuButtonCardView"
                 android:layout_marginBottom="@dimen/menu_button_margin">
                 <ImageButton
-                    android:text="Tour"
+                    android:text="About"
                     android:src="@drawable/ic_info_outline_black_48dp"
-                    style="@style/menuButtonImageButton" />
+                    style="@style/menuButtonImageButton"
+                    android:id="@+id/aboutButton"/>
                 <TextView
                     android:text="About"
                     style="@style/menuButtonTextView"
