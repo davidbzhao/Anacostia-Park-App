@@ -20,7 +20,7 @@ public class SettingsActivity extends Activity {
 
         setResetZonesSettingClickEvent();
         setShowZonesSettingClickEvent();
-
+        setCheckBoxToUser();
     }
 
     private void setResetZonesSettingClickEvent(){
@@ -68,6 +68,12 @@ public class SettingsActivity extends Activity {
             ((TextView) findViewById(R.id.audioZonesVisibleTextView)).setText(R.string.audio_zones_not_visible);
             getApplicationContext().getSharedPreferences(SETTINGS_SHARED_PREFERENCES, Context.MODE_PRIVATE).edit().putBoolean("showZones", false).apply();
             Log.e("mylogs", "showZones false");
+        }
+    }
+
+    private void setCheckBoxToUser(){
+        if(getApplicationContext().getSharedPreferences(SETTINGS_SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("showZones", false)){
+            toggleShowZonesSetting();
         }
     }
 }

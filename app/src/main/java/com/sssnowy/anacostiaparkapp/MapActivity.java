@@ -63,13 +63,15 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        Log.e("mylogs","map ready");
+        Log.e("mylogs", "map ready");
         mMap = googleMap;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(38.817328, -77.169412), 15f));
 
         try {
+            JSONArray polygons = TourActivity.getPolygons(MapActivity.this);
+            drawAudioZoneMarkers(polygons);
             if(getApplicationContext().getSharedPreferences(SettingsActivity.SETTINGS_SHARED_PREFERENCES, Context.MODE_PRIVATE).getBoolean("showZones", false)){
-                drawAudioZones(TourActivity.getPolygons(MapActivity.this));
+                drawAudioZones(polygons);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -164,7 +166,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     /**
      * Draw the audio zones on to the Map in the form of Google Maps Polygons.
      */
-    public void drawAudioZones(JSONArray polygons) throws JSONException {
+    private void drawAudioZones(JSONArray polygons) throws JSONException {
         for(int poly = 0; poly < polygons.length(); poly++){
             LatLng[] coords = new LatLng[polygons.getJSONObject(poly).getJSONArray("coordinates").length()];
             for(int point = 0; point < polygons.getJSONObject(poly).getJSONArray("coordinates").length(); point++){
@@ -183,13 +185,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         .strokeWidth(4f)
                         .fillColor(ContextCompat.getColor(this, R.color.zoneFill)));
             }
+        }
+    }
 
+    private void drawAudioZoneMarkers(JSONArray polygons) throws JSONException {
+        for(int poly = 0; poly < polygons.length(); poly++){
             LatLng markerLocation = new LatLng(polygons.getJSONObject(poly).getJSONArray("marker-location").getDouble(0),
                     polygons.getJSONObject(poly).getJSONArray("marker-location").getDouble(1));
             String title = polygons.getJSONObject(poly).getString("title");
             mMap.addMarker(new MarkerOptions().position(markerLocation)
-                        .title(title)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                    .title(title)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
         }
     }
 
