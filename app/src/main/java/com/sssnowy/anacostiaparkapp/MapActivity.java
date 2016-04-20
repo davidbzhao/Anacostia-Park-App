@@ -19,8 +19,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -34,7 +32,6 @@ import java.io.IOException;
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private static Marker userMarker;
-    private static Circle userCircle;
 
     private LocationService locationService;
     private ServiceConnection locationServiceConnection;
@@ -79,7 +76,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             e.printStackTrace();
         }
         userMarker = createUserMarker();
-        userCircle = createUserCircle();
     }
 
     @Override
@@ -152,15 +148,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         if(userMarker != null) {
             userMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
         }
-        if(userCircle != null){
-            userCircle.setCenter(new LatLng(location.getLatitude(), location.getLongitude()));
-        }
-    }
-
-    public static void setUserCircleRadius(float radius) {
-        if(userCircle != null) {
-            userCircle.setRadius((double) radius);
-        }
     }
 
     /**
@@ -206,18 +193,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
     }
 
-    public Circle createUserCircle(){
-        return mMap.addCircle(new CircleOptions()
-                .center(userMarker.getPosition())
-                .strokeColor(ContextCompat.getColor(this, R.color.circleBorder))
-                .fillColor(ContextCompat.getColor(this, R.color.circleFill))
-                .radius(0));
-    }
-
     public void setUserMarkerToPreviousLocation(){
-//        SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(TourActivity.AUDIO_ZONES_SHARED_PREFERENCES, Context.MODE_PRIVATE);
-//        double lastLatitude = sharedPreferences.getFloat("lastLatitude", 0.0f);
-//        double lastLongitude = sharedPreferences.getFloat("lastLongitude", 0.0f);
         Log.e("mylogs", locationService.getUserLocation().getLatitude() + " : " + locationService.getUserLocation().getLongitude());
         userMarker.setPosition(new LatLng(locationService.getUserLocation().getLatitude(), locationService.getUserLocation().getLongitude()));
     }
