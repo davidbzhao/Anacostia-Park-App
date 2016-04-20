@@ -182,7 +182,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             String title = polygons.getJSONObject(poly).getString("title");
             mMap.addMarker(new MarkerOptions().position(markerLocation)
                     .title(title)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_place_primary_48dp)));
         }
     }
 
@@ -190,7 +190,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(0, 0))
                 .title("You Are Here!")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE)));
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_grade_accent_48dp)));
     }
 
     public void setUserMarkerToPreviousLocation(){
