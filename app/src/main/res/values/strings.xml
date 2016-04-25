@@ -36,4 +36,8 @@
         Core to our work is reaching out to, educating
         and engaging the next generation of decision-makers, our youth.
     </string>
+    <string name="aws_title">Anacostia Watershed Society</string>
+    <string name="aws_subtitle">Mission and Purpose Statements</string>
+    <string name="creator_subtitle">App created by David Zhao and Lee Cain</string>
+    <string name="creator_contact">To contact us, email at 2016dzhao@tjhsst.edu</string>
 </resources>
