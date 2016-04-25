@@ -9,7 +9,7 @@
     <string name="audio_zones_not_visible">Zones are hidden on map</string>
     <string name="title_activity_about">About</string>
     <string name="aws_purpose">
-        "The Anacostia Watershed Society was founded in 1989
+        The Anacostia Watershed Society was founded in 1989
         by a small group of concerned individuals who decided
         that the environmental needs of the Anacostia River
         and its watershed communities required serious attention.
@@ -17,15 +17,15 @@
         have expanded significantly to encompass efforts
         in environmental education, stewardship, and recreation,
         as well as engaging the community through public affairs.
-        We are making a difference and we hope you'll help!"</string>
+        We are making a difference and we hope you\'ll help!</string>
     <string name="aws_mission">
-        "The mission of the Anacostia Watershed Society
+        The mission of the Anacostia Watershed Society
         is to protectand restore the Anacostia River
         and its watershed communities by cleaning the water,
-        recovering the shores, and honoring the heritage."
+        recovering the shores, and honoring the heritage.
     </string>
     <string name="aws_vision">
-        "The vision is to make the Anacostia River and its
+        The vision is to make the Anacostia River and its
         tributaries swimmable and fishable, in keeping
         with the Clean Water Act, for the health
         and enjoyment of everyone in the community. Community
@@ -34,6 +34,6 @@
         partnerships and coalitions, with all parts
         of the community, government, and other stakeholders.
         Core to our work is reaching out to, educating
-        and engaging the next generation of decision-makers, our youth."
+        and engaging the next generation of decision-makers, our youth.
     </string>
 </resources>

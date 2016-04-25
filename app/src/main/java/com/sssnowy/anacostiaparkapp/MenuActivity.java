@@ -71,7 +71,7 @@ public class MenuActivity extends Activity {
         });
 
         ImageButton aboutButton = (ImageButton)findViewById(R.id.aboutButton);
-        settingsButton.setOnClickListener(new View.OnClickListener() {
+        aboutButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Log.e("UserAction","About Button Clicked");
