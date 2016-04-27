@@ -59,6 +59,17 @@ public class MenuActivity extends Activity {
             }
         });
 
+        ImageButton eventsButton = (ImageButton)findViewById(R.id.eventsButton);
+        eventsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("UserAction","Events Button Clicked");
+                Intent intent = new Intent(MenuActivity.this, EventsActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+            }
+        });
+
         ImageButton settingsButton = (ImageButton)findViewById(R.id.settingsButton);
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override

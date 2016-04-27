@@ -63,6 +63,7 @@
                 <ImageButton
                     android:text="Events"
                     android:src="@drawable/ic_event_black_48dp"
+                    android:id="@+id/eventsButton"
                     style="@style/menuButtonImageButton" />
                 <TextView
                     android:text="Events"
