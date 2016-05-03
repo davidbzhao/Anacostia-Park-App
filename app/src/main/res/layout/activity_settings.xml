@@ -7,40 +7,40 @@
     tools:context="com.sssnowy.anacostiaparkapp.SettingsActivity"
     android:background="#FFF">
 
-    <RelativeLayout style="@style/SettingsRow"
+    <RelativeLayout style="@style/gmRow"
         android:id="@+id/resetZonesSetting">
 
-        <LinearLayout style="@style/SettingsTextContainer">
+        <LinearLayout style="@style/gmTextContainer">
 
             <TextView
                 android:text="Audio Tour"
                 android:id="@+id/textView"
-                style="@style/SettingsPrimaryText" />
+                style="@style/gmPrimaryText" />
 
             <TextView
                 android:text="Reset the places you visited"
                 android:id="@+id/textView2"
-                style="@style/SettingsSecondaryText" />
+                style="@style/gmSecondaryText" />
         </LinearLayout>
     </RelativeLayout>
 
-    <RelativeLayout style="@style/SettingsRow"
+    <RelativeLayout style="@style/gmRow"
         android:id="@+id/showZonesSetting"
         android:layout_below="@+id/resetZonesSetting"
         android:layout_alignLeft="@+id/resetZonesSetting"
         android:layout_alignStart="@+id/resetZonesSetting">
 
-        <LinearLayout style="@style/SettingsTextContainer">
+        <LinearLayout style="@style/gmTextContainer">
 
             <TextView
                 android:text="Show audio zones on map"
                 android:id="@+id/textView3"
-                style="@style/SettingsPrimaryText" />
+                style="@style/gmPrimaryText" />
 
             <TextView
                 android:text="@string/audio_zones_not_visible"
                 android:id="@+id/audioZonesVisibleTextView"
-                style="@style/SettingsSecondaryText" />
+                style="@style/gmSecondaryText" />
         </LinearLayout>
 
         <CheckBox

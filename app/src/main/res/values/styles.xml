@@ -47,21 +47,21 @@
         <item name="android:layout_weight">1</item>
     </style>
 
-    <style name="SettingsRow">
+    <style name="gmRow">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">72dp</item>
         <item name="android:paddingLeft">16dp</item>
         <item name="android:paddingRight">16dp</item>
     </style>
 
-    <style name="SettingsTextContainer">
+    <style name="gmTextContainer">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">vertical</item>
         <item name="android:layout_centerVertical">true</item>
     </style>
 
-    <style name="SettingsPrimaryText">
+    <style name="gmPrimaryText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColor">#000</item>
@@ -69,9 +69,20 @@
         <item name="android:alpha">.87</item>
     </style>
 
-    <style name="SettingsSecondaryText">
+    <style name="gmSecondaryText">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#000</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:alpha">.54</item>
+    </style>
+
+    <style name="gmTertiaryText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_centerVertical">true</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_alignParentEnd">true</item>
         <item name="android:textColor">#000</item>
         <item name="android:textSize">14sp</item>
         <item name="android:alpha">.54</item>

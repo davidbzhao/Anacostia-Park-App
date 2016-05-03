@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/gmRow">
+    <LinearLayout
+        style="@style/gmTextContainer" >
+
+        <TextView
+            style="@style/gmPrimaryText"
+            android:id="@+id/primaryText"/>
+
+        <TextView
+            style="@style/gmSecondaryText"
+            android:id="@+id/secondaryText"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tertiaryText"
+        style="@style/gmTertiaryText" />
+</RelativeLayout>

@@ -12,6 +12,8 @@
     <color name="zoneBorderVisited">#9E9E9E</color>
     <color name="zoneFillVisited">#459E9E9E</color>
 
+    <color name="black">#000</color>
+
 
     <!--<color name="aws_colorPrimary">#6FA542</color>-->
     <!--<color name="aws_colorPrimaryDark">#4E7828</color>-->
