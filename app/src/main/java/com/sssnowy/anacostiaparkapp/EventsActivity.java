@@ -2,6 +2,7 @@ package com.sssnowy.anacostiaparkapp;
 
 import android.app.ActionBar;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
@@ -14,6 +15,7 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -155,7 +157,7 @@ public class EventsActivity extends Activity {
                     Log.e("mylogs", jsonArray.toString(2));
                     for (int cnt = 0; cnt < jsonArray.length(); cnt++) {
                         ViewGroup eventRow = (ViewGroup) EventsActivity.this.getLayoutInflater().inflate(R.layout.event_row, eventLinearLayout, false);
-                        JSONObject event = (JSONObject) jsonArray.get(cnt);
+                        final JSONObject event = (JSONObject) jsonArray.get(cnt);
                         ((TextView)eventRow.findViewById(R.id.primaryText)).setText(event.get("title").toString());
                         ((TextView)eventRow.findViewById(R.id.secondaryText)).setText(event.get("subtitle").toString());
                         DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
@@ -163,6 +165,19 @@ public class EventsActivity extends Activity {
                         ((TextView) eventRow.findViewById(R.id.tertiaryText)).setText(newformat.format(format.parse(event.get("date").toString())));
                         if(format.parse(event.get("date").toString()).after(new Date())){
                             eventLinearLayout.addView(eventRow);
+                            eventRow.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent intent = new Intent(EventsActivity.this, EventInformationActivity.class);
+                                    try {
+                                        intent.putExtra("url", event.get("url").toString());
+                                    } catch (JSONException e) {
+                                        e.printStackTrace();
+                                    }
+                                    intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                    startActivity(intent);
+                                }
+                            });
                         }
                     }
                 } catch (JSONException e) {
