@@ -11,6 +11,9 @@ import android.text.Spanned;
 import android.text.SpannedString;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -39,6 +42,7 @@ import java.util.Date;
 
 public class EventsActivity extends Activity {
     private LinearLayout eventLinearLayout;
+    private AsyncTask<String, Void, JSONArray> curMonthAsyncTask, nextMonthAsyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +54,29 @@ public class EventsActivity extends Activity {
 
         Log.e("mylogs", getAWSCalendarURL());
         Log.e("mylogs", getNextMonthAWSCalendarURL());
-        createAsyncTask().execute(getAWSCalendarURL());
-        createAsyncTask().execute(getNextMonthAWSCalendarURL());
+        curMonthAsyncTask = createAsyncTask().execute(getAWSCalendarURL());
+        nextMonthAsyncTask = createAsyncTask().execute(getNextMonthAWSCalendarURL());
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Log.e("mylogs", "onCreateOptionsMenu");
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_events, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.actionRefreshEvents){
+            eventLinearLayout.removeAllViews();
+            curMonthAsyncTask.cancel(true);
+            nextMonthAsyncTask.cancel(true);
+            Log.e("mylogs", "Refreshed Events");
+            curMonthAsyncTask = createAsyncTask().execute(getAWSCalendarURL());
+            nextMonthAsyncTask = createAsyncTask().execute(getNextMonthAWSCalendarURL());
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private String getAWSCalendarURL(){
@@ -86,6 +111,7 @@ public class EventsActivity extends Activity {
                         Elements events = hasevents.getElementsByClass("view-field");
                         for (Element event : events) {
                             String eventString = event.child(0).text();
+                            String url = "http://www.anacostiaws.org" + event.child(0).attr("href");
                             int titleBreak = eventString.indexOf(":");
                             if(Character.isDigit(eventString.charAt(titleBreak + 1))){
                                 titleBreak = eventString.indexOf(":", titleBreak + 1);
@@ -98,7 +124,7 @@ public class EventsActivity extends Activity {
                                 titleBreak = eventString.indexOf("-");
                             }
 
-                            Log.e("mylogs", eventString + " === " + titleBreak + " === " + eventString.indexOf("-"));
+//                            Log.e("mylogs", eventString + " === " + titleBreak + " === " + eventString.indexOf("-"));
                             JSONObject cur = new JSONObject();
                             String title = event.child(0).text();
                             String subtitle = "";
@@ -111,8 +137,9 @@ public class EventsActivity extends Activity {
                             cur.put("title", title);
                             cur.put("subtitle", subtitle);
                             cur.put("date", date);
+                            cur.put("url", url);
                             eventsJSONArray.put(cur);
-                            Log.e("mylogs", event.child(0).text());
+//                            Log.e("mylogs", event.child(0).text());
                         }
                     }
                 } catch (IOException | JSONException e) {
@@ -134,7 +161,9 @@ public class EventsActivity extends Activity {
                         DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
                         DateFormat newformat = new SimpleDateFormat("MMM dd");
                         ((TextView) eventRow.findViewById(R.id.tertiaryText)).setText(newformat.format(format.parse(event.get("date").toString())));
-                        eventLinearLayout.addView(eventRow);
+                        if(format.parse(event.get("date").toString()).after(new Date())){
+                            eventLinearLayout.addView(eventRow);
+                        }
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
