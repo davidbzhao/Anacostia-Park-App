@@ -41,5 +41,5 @@
     <string name="creator_subtitle">App created by David Zhao and Lee Cain</string>
     <string name="creator_contact">To contact us, email at 2016dzhao@tjhsst.edu</string>
     <string name="title_activity_events">Events</string>
-    <string name="title_activity_event_information">EventInformationActivity</string>
+    <string name="title_activity_event_information">Event Information</string>
 </resources>
