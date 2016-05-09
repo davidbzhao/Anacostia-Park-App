@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -56,8 +57,11 @@ public class EventsActivity extends Activity {
 
         Log.e("mylogs", getAWSCalendarURL());
         Log.e("mylogs", getNextMonthAWSCalendarURL());
-        curMonthAsyncTask = createAsyncTask().execute(getAWSCalendarURL());
-        nextMonthAsyncTask = createAsyncTask().execute(getNextMonthAWSCalendarURL());
+        Log.e("mylogs", eventLinearLayout.getChildCount() + "");
+        if(eventLinearLayout.getChildCount() == 0) {
+            curMonthAsyncTask = createAsyncTask().execute(getAWSCalendarURL());
+            nextMonthAsyncTask = createAsyncTask().execute(getNextMonthAWSCalendarURL());
+        }
     }
 
     @Override
@@ -70,15 +74,28 @@ public class EventsActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if(item.getItemId() == R.id.actionRefreshEvents){
-            eventLinearLayout.removeAllViews();
-            curMonthAsyncTask.cancel(true);
-            nextMonthAsyncTask.cancel(true);
-            Log.e("mylogs", "Refreshed Events");
-            curMonthAsyncTask = createAsyncTask().execute(getAWSCalendarURL());
-            nextMonthAsyncTask = createAsyncTask().execute(getNextMonthAWSCalendarURL());
+        Log.e("mylogs","Action Bar Action: " + item.getItemId());
+        switch(item.getItemId()){
+            case R.id.actionRefreshEvents:
+                eventLinearLayout.removeAllViews();
+                curMonthAsyncTask.cancel(true);
+                nextMonthAsyncTask.cancel(true);
+                Log.e("mylogs", "Refreshed Events");
+                curMonthAsyncTask = createAsyncTask().execute(getAWSCalendarURL());
+                nextMonthAsyncTask = createAsyncTask().execute(getNextMonthAWSCalendarURL());
+                break;
+            case android.R.id.home:
+                onBackPressed();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(EventsActivity.this, MenuActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
     }
 
     private String getAWSCalendarURL(){
@@ -151,41 +168,62 @@ public class EventsActivity extends Activity {
             }
 
             @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                findViewById(R.id.eventsProgressBar).setVisibility(View.VISIBLE);
+            }
+
+            @Override
             protected void onPostExecute(JSONArray jsonArray) {
                 super.onPostExecute(jsonArray);
-                try {
-                    Log.e("mylogs", jsonArray.toString(2));
-                    for (int cnt = 0; cnt < jsonArray.length(); cnt++) {
-                        ViewGroup eventRow = (ViewGroup) EventsActivity.this.getLayoutInflater().inflate(R.layout.event_row, eventLinearLayout, false);
-                        final JSONObject event = (JSONObject) jsonArray.get(cnt);
-                        ((TextView)eventRow.findViewById(R.id.primaryText)).setText(event.get("title").toString());
-                        ((TextView)eventRow.findViewById(R.id.secondaryText)).setText(event.get("subtitle").toString());
-                        DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
-                        DateFormat newformat = new SimpleDateFormat("MMM dd");
-                        ((TextView) eventRow.findViewById(R.id.tertiaryText)).setText(newformat.format(format.parse(event.get("date").toString())));
-                        if(format.parse(event.get("date").toString()).after(new Date())){
-                            eventLinearLayout.addView(eventRow);
-                            eventRow.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent intent = new Intent(EventsActivity.this, EventInformationActivity.class);
-                                    try {
-                                        intent.putExtra("url", event.get("url").toString());
-                                    } catch (JSONException e) {
-                                        e.printStackTrace();
+                findViewById(R.id.eventsProgressBar).setVisibility(View.INVISIBLE);
+                if(jsonArray.length() != 0) {
+                    try {
+                        Log.e("mylogs", jsonArray.toString(2));
+                        for (int cnt = 0; cnt < jsonArray.length(); cnt++) {
+                            ViewGroup eventRow = (ViewGroup) EventsActivity.this.getLayoutInflater().inflate(R.layout.event_row, eventLinearLayout, false);
+                            final JSONObject event = (JSONObject) jsonArray.get(cnt);
+                            ((TextView) eventRow.findViewById(R.id.primaryText)).setText(event.get("title").toString());
+                            ((TextView) eventRow.findViewById(R.id.secondaryText)).setText(event.get("subtitle").toString());
+                            DateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+                            DateFormat newformat = new SimpleDateFormat("MMM dd");
+                            ((TextView) eventRow.findViewById(R.id.tertiaryText)).setText(newformat.format(format.parse(event.get("date").toString())));
+                            if (format.parse(event.get("date").toString()).after(new Date())) {
+                                eventLinearLayout.addView(eventRow);
+                                eventRow.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        Intent intent = new Intent(EventsActivity.this, EventInformationActivity.class);
+                                        try {
+                                            intent.putExtra("url", event.get("url").toString());
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                                        startActivity(intent);
                                     }
-                                    intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                                    startActivity(intent);
-                                }
-                            });
+                                });
+                            }
                         }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
                     }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (ParseException e) {
-                    e.printStackTrace();
+                } else {
+                    TextView errorTextView = new TextView(EventsActivity.this);
+                    errorTextView.setText("Oops, this is awkward. We can't seem to grab the events. Maybe try refreshing?");
+                    errorTextView.setTextColor(ContextCompat.getColor(EventsActivity.this, R.color.black));
+                    errorTextView.setTextSize(16);
+                    eventLinearLayout.addView(errorTextView);
                 }
             }
         };
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e("mylogs","JHGPORIUHGPOHPOIHGPORIHGPOIRHGPIR");
     }
 }

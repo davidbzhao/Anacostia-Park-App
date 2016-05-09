@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.app.Activity;
 import android.text.Html;
 import android.util.Log;
+import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -67,22 +68,24 @@ public class EventInformationActivity extends Activity {
         };
 
         displayEventInformationAsyncTask.execute(url);
-//        Document document = null;
-//        try {
-//            document = Jsoup.connect(url).get();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        Log.e("mylogs", String.valueOf(document == null));
-//
-//        Log.e("mylogs", document.toString());
-//        Log.e("mylogs", String.valueOf(document.getElementById("submiddle") == null));
-//        Log.e("mylogs", document.getElementById("submiddle").toString());;
-//        String html = Html.fromHtml(document.getElementById("submiddle").toString()).toString();
-
-//        final WebView webView = (WebView)findViewById(R.id.eventWebView);
-//        webView.getSettings().setJavaScriptEnabled(true);
-//        webView.loadUrl(url);
     }
 
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.e("mylogs", "Action Bar Action: " + item.getItemId());
+        switch(item.getItemId()){
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(EventInformationActivity.this, EventsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        startActivity(intent);
+    }
 }
