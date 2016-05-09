@@ -87,5 +87,6 @@ public class EventInformationActivity extends Activity {
         Intent intent = new Intent(EventInformationActivity.this, EventsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         startActivity(intent);
+        finish();
     }
 }
