@@ -43,4 +43,6 @@
     <string name="title_activity_events">Events</string>
     <string name="title_activity_event_information">Event Information</string>
     <string name="title_activity_gallery">Gallery</string>
+    <string name="title_activity_image">Image</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

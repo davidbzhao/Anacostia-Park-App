@@ -1,5 +1,7 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 import android.support.v7.widget.GridLayoutManager;
@@ -7,9 +9,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.Layout;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -40,6 +45,7 @@ public class GalleryActivity extends Activity {
             "https://pixabay.com/static/uploads/photo/2015/12/08/00/37/mountains-landscape-1081889_960_720.jpg",
             "https://pixabay.com/static/uploads/photo/2015/05/30/19/59/landscape-790644_960_720.jpg"
     };
+    private int position = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +64,34 @@ public class GalleryActivity extends Activity {
         RecyclerAdapter recyclerAdapter = new RecyclerAdapter(data, R.id.galleryRecyclerView);
 
         galleryRecyclerView.setAdapter(recyclerAdapter);
+
+        galleryRecyclerView.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            @Override
+            public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+                Log.e("mylogs", "Gallery View Clicked");
+                return false;
+            }
+
+            @Override
+            public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+                Log.e("mylogs", "Gallery View Clicked ACTION UP");
+                Intent intent = new Intent(GalleryActivity.this, ImageActivity.class);
+                intent.putParcelableArrayListExtra("data", data);
+                intent.putExtra("position", position);
+                startActivity(intent);
+            }
+
+            @Override
+            public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+                Log.e("mylogs", "Gallery View Clicked");
+            }
+        });
+
+
+//        Intent intent = new Intent(GalleryActivity.this, ImageActivity.class);
+//        intent.putParcelableArrayListExtra("images", images);
+//        intent.putExtra("position", position);
+//        startActivity(intent);
     }
 
     class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ViewHolder> {
@@ -77,11 +111,13 @@ public class GalleryActivity extends Activity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
+            GalleryActivity.this.position = position;
             Glide.with(GalleryActivity.this).load(images.get(position).getUrl())
                     .thumbnail(0.5f)
                     .crossFade()
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(holder.getImageView());
+
         }
 
         @Override
@@ -106,6 +142,5 @@ public class GalleryActivity extends Activity {
             }
         }
     }
-
 }
 

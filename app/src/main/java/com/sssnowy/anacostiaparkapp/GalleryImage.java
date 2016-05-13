@@ -1,9 +1,12 @@
 package com.sssnowy.anacostiaparkapp;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by 2016dzhao on 5/13/2016.
  */
-public class GalleryImage {
+public class GalleryImage implements Parcelable {
     private String title, url;
 
     public GalleryImage(){
@@ -29,5 +32,15 @@ public class GalleryImage {
 
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+
     }
 }
