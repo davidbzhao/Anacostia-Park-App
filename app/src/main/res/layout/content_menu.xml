@@ -78,6 +78,7 @@
                 <ImageButton
                     android:text="Gallery"
                     android:src="@drawable/ic_photo_library_black_48dp"
+                    android:id="@+id/galleryImageButton"
                     style="@style/menuButtonImageButton" />
                 <TextView
                     android:text="Gallery"

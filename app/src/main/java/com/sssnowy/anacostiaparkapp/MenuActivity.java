@@ -70,6 +70,17 @@ public class MenuActivity extends Activity {
             }
         });
 
+        ImageButton galleryButton = (ImageButton)findViewById(R.id.galleryImageButton);
+        galleryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.e("UserAction","Gallery Button Clicked");
+                Intent intent = new Intent(MenuActivity.this, GalleryActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                startActivity(intent);
+            }
+        });
+
         ImageButton settingsButton = (ImageButton)findViewById(R.id.settingsButton);
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -91,6 +91,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.sssnowy.anacostiaparkapp.EventsActivity" />
         </activity>
+        <activity
+            android:name=".GalleryActivity"
+            android:label="@string/title_activity_gallery"
+            android:parentActivityName=".MenuActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.sssnowy.anacostiaparkapp.MenuActivity" />
+        </activity>
     </application>
 
 </manifest>
