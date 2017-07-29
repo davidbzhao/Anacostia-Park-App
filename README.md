@@ -8,4 +8,6 @@ tour guide experience.
 Although originally intended for the Anacostia Park, the project has transformed into creating a framework for a geonarrative audio
 app. An audio tour on your phone could be used at many sites such as college campuses or historical cities.
 
-The framework for this geonarrative app is currently under construction.
+## Inspiration
+
+This was my senior lab project for the Web/Android app development senior lab at TJHSST.
